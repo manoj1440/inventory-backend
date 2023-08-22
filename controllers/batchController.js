@@ -1,19 +1,16 @@
 const Batch = require('../models/Batch');
 
-// Create a new batch
 const addBatch = async (req, res, next) => {
     try {
         const { panels, receivedAt, serialNumber, user } = req.body;
 
-        // Validate inputs
         if (!serialNumber || !user) {
-            return res.status(400).json({ message: 'Serial number and user are required' });
+            return res.status(400).json({ status: false, data: null, message: 'Serial number and user are required' });
         }
 
-        // Check if serial number is already registered
         const existingBatch = await Batch.findOne({ serialNumber });
         if (existingBatch) {
-            return res.status(400).json({ message: 'Serial number already exists' });
+            return res.status(400).json({ status: false, data: null, message: 'Serial number already exists' });
         }
 
         const newBatch = new Batch({
@@ -24,37 +21,34 @@ const addBatch = async (req, res, next) => {
         });
 
         const savedBatch = await newBatch.save();
-        return res.status(201).json(savedBatch);
+        return res.status(201).json({ status: true, data: savedBatch, message: 'Batch created successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error adding batch', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error adding batch' });
     }
 };
 
-// Get all batches
 const getBatches = async (req, res, next) => {
     try {
         const batches = await Batch.find().populate('panels user');
-        return res.status(200).json(batches);
+        return res.status(200).json({ status: true, data: batches, message: 'Batches fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error fetching batches', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching batches' });
     }
 };
 
-// Get a batch by ID
 const getBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
         const batch = await Batch.findById(batchId).populate('panels user');
         if (!batch) {
-            return res.status(404).json({ message: 'Batch not found' });
+            return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
         }
-        return res.status(200).json(batch);
+        return res.status(200).json({ status: true, data: batch, message: 'Batch fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error fetching batch', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching batch' });
     }
 };
 
-// Update a batch by ID
 const updateBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
@@ -62,25 +56,24 @@ const updateBatchById = async (req, res, next) => {
 
         const updatedBatch = await Batch.findByIdAndUpdate(batchId, updates, { new: true }).populate('panels user');
         if (!updatedBatch) {
-            return res.status(404).json({ message: 'Batch not found' });
+            return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
         }
-        return res.status(200).json(updatedBatch);
+        return res.status(200).json({ status: true, data: updatedBatch, message: 'Batch updated successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error updating batch', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error updating batch' });
     }
 };
 
-// Delete a batch by ID
 const deleteBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
         const deletedBatch = await Batch.findByIdAndDelete(batchId);
         if (!deletedBatch) {
-            return res.status(404).json({ message: 'Batch not found' });
+            return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
         }
-        return res.status(200).json({ message: 'Batch deleted' });
+        return res.status(200).json({ status: true, data: null, message: 'Batch deleted successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error deleting batch', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error deleting batch' });
     }
 };
 

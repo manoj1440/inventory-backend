@@ -1,19 +1,16 @@
 const Panel = require('../models/Panel');
 
-// Create a new panel
 const addPanel = async (req, res, next) => {
     try {
         const { serialNumber } = req.body;
 
-        // Validate inputs
         if (!serialNumber) {
-            return res.status(400).json({ message: 'Serial number is required' });
+            return res.status(400).json({ status: false, data: null, message: 'Serial number is required' });
         }
 
-        // Check if serial number is already registered
         const existingPanel = await Panel.findOne({ serialNumber });
         if (existingPanel) {
-            return res.status(400).json({ message: 'Serial number already exists' });
+            return res.status(400).json({ status: false, data: null, message: 'Serial number already exists' });
         }
 
         const newPanel = new Panel({
@@ -21,37 +18,34 @@ const addPanel = async (req, res, next) => {
         });
 
         const savedPanel = await newPanel.save();
-        return res.status(201).json(savedPanel);
+        return res.status(201).json({ status: true, data: savedPanel, message: 'Panel created successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error adding panel', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error adding panel' });
     }
 };
 
-// Get all panels
 const getPanels = async (req, res, next) => {
     try {
         const panels = await Panel.find();
-        return res.status(200).json(panels);
+        return res.status(200).json({ status: true, data: panels, message: 'Panels fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error fetching panels', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' });
     }
 };
 
-// Get a panel by ID
 const getPanelById = async (req, res, next) => {
     try {
         const panelId = req.params.id;
         const panel = await Panel.findById(panelId);
         if (!panel) {
-            return res.status(404).json({ message: 'Panel not found' });
+            return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
         }
-        return res.status(200).json(panel);
+        return res.status(200).json({ status: true, data: panel, message: 'Panel fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error fetching panel', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching panel' });
     }
 };
 
-// Update a panel by ID
 const updatePanelById = async (req, res, next) => {
     try {
         const panelId = req.params.id;
@@ -59,25 +53,24 @@ const updatePanelById = async (req, res, next) => {
 
         const updatedPanel = await Panel.findByIdAndUpdate(panelId, updates, { new: true });
         if (!updatedPanel) {
-            return res.status(404).json({ message: 'Panel not found' });
+            return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
         }
-        return res.status(200).json(updatedPanel);
+        return res.status(200).json({ status: true, data: updatedPanel, message: 'Panel updated successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error updating panel', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error updating panel' });
     }
 };
 
-// Delete a panel by ID
 const deletePanelById = async (req, res, next) => {
     try {
         const panelId = req.params.id;
         const deletedPanel = await Panel.findByIdAndDelete(panelId);
         if (!deletedPanel) {
-            return res.status(404).json({ message: 'Panel not found' });
+            return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
         }
-        return res.status(200).json({ message: 'Panel deleted' });
+        return res.status(200).json({ status: true, data: null, message: 'Panel deleted successfully' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error deleting panel', error });
+        return res.status(500).json({ status: false, data: null, message: 'Error deleting panel' });
     }
 };
 
@@ -86,5 +79,5 @@ module.exports = {
     getPanels,
     getPanelById,
     updatePanelById,
-    deletePanelById
+    deletePanelById,
 };
