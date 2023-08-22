@@ -16,7 +16,7 @@ const batchSchema = new Schema({
         type: Date,
         default: null,
     },
-    serialNumber: {
+    AssetNumber: {
         type: String,
         required: true,
         unique: true,
@@ -26,6 +26,14 @@ const batchSchema = new Schema({
         ref: 'User',
         required: true,
     },
+    quantity: {
+        type: Number,
+        required: true,
+    },
+    PCM: String,
+    DOM: Date,
+    WhLocation: String,
+    DeliveryLocation: String,
 }, {
     timestamps: true,
 });

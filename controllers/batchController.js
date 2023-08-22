@@ -2,22 +2,27 @@ const Batch = require('../models/Batch');
 
 const addBatch = async (req, res, next) => {
     try {
-        const { panels, receivedAt, serialNumber, user } = req.body;
+        const { panels, receivedAt, AssetNumber, user, quantity, PCM, DOM, WhLocation, DeliveryLocation } = req.body;
 
-        if (!serialNumber || !user) {
-            return res.status(400).json({ status: false, data: null, message: 'Serial number and user are required' });
+        if (!AssetNumber || !user) {
+            return res.status(400).json({ status: false, data: null, message: 'Asset number and user are required' });
         }
 
-        const existingBatch = await Batch.findOne({ serialNumber });
+        const existingBatch = await Batch.findOne({ AssetNumber });
         if (existingBatch) {
-            return res.status(400).json({ status: false, data: null, message: 'Serial number already exists' });
+            return res.status(400).json({ status: false, data: null, message: 'Asset number already exists' });
         }
 
         const newBatch = new Batch({
             panels,
             receivedAt,
-            serialNumber,
+            AssetNumber,
             user,
+            quantity,
+            PCM,
+            DOM,
+            WhLocation,
+            DeliveryLocation,
         });
 
         const savedBatch = await newBatch.save();
