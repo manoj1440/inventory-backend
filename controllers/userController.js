@@ -1,7 +1,8 @@
 const User = require('../models/User');
+const hashPassword = require('../utils/hash-password');
 const addUser = async (req, res, next) => {
     try {
-        const { name, email, password, contact, role } = req.body;
+        const { name, email, password, contact, role, location } = req.body;
         if (!name || !email || !password || !contact) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -19,10 +20,13 @@ const addUser = async (req, res, next) => {
             return res.status(400).json({ message: 'Invalid contact number format' });
         }
 
+        const hashedPassword = hashPassword(password);
+
         const newUser = new User({
             name,
             email,
-            password,
+            password: hashedPassword,
+            location,
             contact,
             role
         });
