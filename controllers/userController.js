@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const hashPassword = require('../utils/hash-password');
+const validator = require('validator');
+
 const addUser = async (req, res, next) => {
     try {
         const { name, email, password, contact, role, location } = req.body;
@@ -34,7 +36,7 @@ const addUser = async (req, res, next) => {
         const savedUser = await newUser.save();
         return res.status(201).json(savedUser);
     } catch (error) {
-        return res.status(500).json({ message: 'Error adding user', error });
+        return res.status(500).json({ message: 'Error adding user', error: JSON.stringify(error) });
     }
 };
 
@@ -43,7 +45,7 @@ const getUsers = async (req, res, next) => {
         const users = await User.find();
         return res.status(200).json(users);
     } catch (error) {
-        return res.status(500).json({ message: 'Error fetching users', error });
+        return res.status(500).json({ message: 'Error fetching users', error: JSON.stringify(error) });
     }
 };
 
@@ -56,7 +58,7 @@ const getUserById = async (req, res, next) => {
         }
         return res.status(200).json(user);
     } catch (error) {
-        return res.status(500).json({ message: 'Error fetching user', error });
+        return res.status(500).json({ message: 'Error fetching user', error: JSON.stringify(error) });
     }
 };
 
@@ -93,7 +95,7 @@ const updateUserById = async (req, res, next) => {
         }
         return res.status(200).json(updatedUser);
     } catch (error) {
-        return res.status(500).json({ message: 'Error updating user', error });
+        return res.status(500).json({ message: 'Error updating user', error: JSON.stringify(error) });
     }
 };
 
@@ -106,7 +108,7 @@ const deleteUserById = async (req, res, next) => {
         }
         return res.status(200).json({ message: 'User deleted' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error deleting user', error });
+        return res.status(500).json({ message: 'Error deleting user', error: JSON.stringify(error) });
     }
 };
 
