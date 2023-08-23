@@ -13,7 +13,7 @@ const MONGODB_URI = `mongodb://${process.env.MONGODB_HOST_NAME}:${process.env.MO
 app.use(require('helmet')());
 app.use(require('compression')());
 app.use(require('cors')({
-    origin: '*',
+    origin: process.env.CORS_URL,
     credentials: true,
 }));
 
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(authentication);
+// app.use(authentication);
 
 indexRoutes.forEach(api => {
     app.use(api.route, api.controller);
