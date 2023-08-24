@@ -4,7 +4,7 @@ const panelRoutes = require('./panelRoutes');
 const batchRoutes = require('./batchRoutes');
 module.exports = [
     {
-        route: '/api/login',
+        route: '/api',
         controller: authRoutes
     },
     {

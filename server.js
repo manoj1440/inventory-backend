@@ -51,7 +51,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.use(authentication);
+app.use(authentication);
 
 indexRoutes.forEach(api => {
     app.use(api.route, api.controller);

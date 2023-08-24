@@ -11,7 +11,8 @@ const authentication = (req, res, next) => {
     const token = req.headers.authorization || req.cookies.token;
 
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized token access' });
+        res.clearCookie('token');
+        return res.status(401).json({ staus: false, tokenFailed: true, message: 'Unauthorized token access' });
     }
 
     try {
@@ -19,7 +20,8 @@ const authentication = (req, res, next) => {
         req.userData = decodedToken; // Attach the decoded payload to the request object
         next();
     } catch (error) {
-        return res.status(401).json({ message: 'Token expired or invalid' });
+        res.clearCookie('token');
+        return res.status(401).json({ staus: false, tokenFailed: true, message: 'Token expired or invalid' });
     }
 };
 
