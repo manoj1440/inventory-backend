@@ -2,6 +2,7 @@ const authRoutes = require('./authRoutes');
 const userRoutes = require('./userRoutes');
 const panelRoutes = require('./panelRoutes');
 const batchRoutes = require('./batchRoutes');
+const dashboardRoutes = require('./dashboardRoutes');
 module.exports = [
     {
         route: '/api',
@@ -18,5 +19,9 @@ module.exports = [
     {
         route: '/api/batch',
         controller: batchRoutes
+    },
+    {
+        route: '/api/dashboard',
+        controller: dashboardRoutes
     },
 ]

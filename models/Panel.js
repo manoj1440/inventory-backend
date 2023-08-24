@@ -6,6 +6,10 @@ const panelSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    included: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true,
 });

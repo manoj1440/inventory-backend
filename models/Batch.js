@@ -16,6 +16,10 @@ const batchSchema = new Schema({
         type: Date,
         default: null,
     },
+    received: {
+        type: Boolean,
+        default: false,
+    },
     AssetNumber: {
         type: String,
         required: true,

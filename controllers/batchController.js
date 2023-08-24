@@ -1,4 +1,5 @@
 const Batch = require('../models/Batch');
+const Panel = require('../models/Panel');
 
 const addBatch = async (req, res, next) => {
     try {
@@ -12,6 +13,11 @@ const addBatch = async (req, res, next) => {
         if (existingBatch) {
             return res.status(400).json({ status: false, data: null, message: 'Asset number already exists' });
         }
+
+        await Panel.updateMany(
+            { _id: { $in: panels } },
+            { $set: { included: true } }
+        );
 
         const newBatch = new Batch({
             panels,
@@ -72,10 +78,21 @@ const updateBatchById = async (req, res, next) => {
 const deleteBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
+        const batch = await Batch.findById(batchId);
+
+        if (!batch) {
+            return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
+        }
+        await Panel.updateMany(
+            { _id: { $in: batch.panels } },
+            { $set: { included: false } }
+        );
         const deletedBatch = await Batch.findByIdAndDelete(batchId);
+
         if (!deletedBatch) {
             return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
         }
+
         return res.status(200).json({ status: true, data: null, message: 'Batch deleted successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error deleting batch' });

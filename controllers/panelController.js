@@ -33,6 +33,15 @@ const getPanels = async (req, res, next) => {
     }
 };
 
+const getPanelsForBatch = async (req, res, next) => {
+    try {
+        const panels = await Panel.find({ included: false });
+        return res.status(200).json({ status: true, data: panels, message: 'Panels fetched successfully' });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' });
+    }
+};
+
 const getPanelById = async (req, res, next) => {
     try {
         const panelId = req.params.id;
@@ -80,4 +89,5 @@ module.exports = {
     getPanelById,
     updatePanelById,
     deletePanelById,
+    getPanelsForBatch
 };
