@@ -11,6 +11,11 @@ const getDashboardData = async (req, res, next) => {
 
         const userOverview = await User.aggregate([
             {
+                $match: {
+                    role: 'customer'
+                }
+            },
+            {
                 $lookup: {
                     from: 'batches',
                     localField: '_id',
