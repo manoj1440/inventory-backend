@@ -6,6 +6,7 @@ const batchSchema = new Schema({
         {
             type: Schema.Types.ObjectId,
             ref: 'Panel',
+            required: true,
         },
     ],
     createdAt: {

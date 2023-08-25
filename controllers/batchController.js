@@ -14,11 +14,6 @@ const addBatch = async (req, res, next) => {
             return res.status(400).json({ status: false, data: null, message: 'Asset number already exists' });
         }
 
-        await Panel.updateMany(
-            { _id: { $in: panels } },
-            { $set: { included: true } }
-        );
-
         const newBatch = new Batch({
             panels,
             receivedAt,
@@ -32,6 +27,13 @@ const addBatch = async (req, res, next) => {
         });
 
         const savedBatch = await newBatch.save();
+        if (savedBatch) {
+            await Panel.updateMany(
+                { _id: { $in: panels } },
+                { $set: { included: true } }
+            );
+        }
+
         return res.status(201).json({ status: true, data: savedBatch, message: 'Batch created successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error adding batch' });
@@ -68,6 +70,12 @@ const updateBatchById = async (req, res, next) => {
         const updatedBatch = await Batch.findByIdAndUpdate(batchId, updates, { new: true }).populate('panels user');
         if (!updatedBatch) {
             return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
+        }
+        if (updatedBatch && updates.panels && updates.panels.length > 0) {
+            await Panel.updateMany(
+                { _id: { $in: updates.panels } },
+                { $set: { included: true } }
+            );
         }
         return res.status(200).json({ status: true, data: updatedBatch, message: 'Batch updated successfully' });
     } catch (error) {

@@ -16,14 +16,14 @@ const login = async (req, res, next) => {
         }
 
         delete user.password;
-
+        const expiresIn = process.env.USER_EXPIRE ? Number(process.env.USER_EXPIRE) : 60 * 60;
         const token = jwt.sign({
             user
         },
             process.env.JWT_SECRET,
-            { expiresIn: 60 * 60 });
+            { expiresIn });
 
-        res.cookie('token', token, { maxAge: 900000 });
+        res.cookie('token', token, { maxAge: expiresIn * 1000 });
         return res.send({
             status: true,
             message: 'success',

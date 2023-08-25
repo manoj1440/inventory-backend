@@ -12,8 +12,10 @@ const MONGODB_URI = `mongodb://${process.env.MONGODB_HOST_NAME}:${process.env.MO
 
 app.use(require('helmet')());
 app.use(require('compression')());
+
+const corsUrls = process.env.CORS_URL.split(',');
 app.use(require('cors')({
-    origin: process.env.CORS_URL,
+    origin: corsUrls,
     credentials: true,
 }));
 
