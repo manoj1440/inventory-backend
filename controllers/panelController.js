@@ -3,7 +3,7 @@ const Batch = require('../models/Batch');
 
 const addPanel = async (req, res, next) => {
     try {
-        const { serialNumber } = req.body;
+        const { serialNumber, DOE, DOM } = req.body;
 
         if (!serialNumber) {
             return res.status(400).json({ status: false, data: null, message: 'Serial number is required' });
@@ -16,6 +16,7 @@ const addPanel = async (req, res, next) => {
 
         const newPanel = new Panel({
             serialNumber,
+            DOE, DOM
         });
 
         const savedPanel = await newPanel.save();
@@ -28,11 +29,19 @@ const addPanel = async (req, res, next) => {
 const getPanels = async (req, res, next) => {
     try {
         const panels = await Panel.find();
-        return res.status(200).json({ status: true, data: panels, message: 'Panels fetched successfully' });
+        const panelsWithAssetNumber = await Promise.all(panels.map(async (panel) => {
+            const batch = await Batch.findOne({ panels: panel._id }).select('AssetNumber');
+            return {
+                ...panel.toObject(),
+                AssetNumber: batch ? batch.AssetNumber : null,
+            };
+        }));
+        return res.status(200).json({ status: true, data: panelsWithAssetNumber, message: 'Panels fetched successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' });
     }
 };
+
 
 const getPanelsForBatch = async (req, res, next) => {
     try {

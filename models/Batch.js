@@ -31,12 +31,9 @@ const batchSchema = new Schema({
         ref: 'User',
         required: true,
     }],
-    quantity: {
-        type: Number,
-        required: true,
-    },
     PCM: String,
     DOM: Date,
+    Dispatched: Date,
     WhLocation: String,
     DeliveryLocation: String,
 }, {

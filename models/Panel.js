@@ -6,6 +6,8 @@ const panelSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    DOM: Date,
+    DOE: Date,
     included: {
         type: Boolean,
         default: false

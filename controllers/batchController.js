@@ -3,7 +3,7 @@ const Panel = require('../models/Panel');
 
 const addBatch = async (req, res, next) => {
     try {
-        const { panels, receivedAt, AssetNumber, user, quantity, PCM, DOM, WhLocation, DeliveryLocation } = req.body;
+        const { panels, receivedAt, AssetNumber, user, PCM, DOM, WhLocation, DeliveryLocation } = req.body;
 
         if (!AssetNumber || !user) {
             return res.status(400).json({ status: false, data: null, message: 'Asset number and user are required' });
@@ -19,7 +19,6 @@ const addBatch = async (req, res, next) => {
             receivedAt,
             AssetNumber,
             user,
-            quantity,
             PCM,
             DOM,
             WhLocation,

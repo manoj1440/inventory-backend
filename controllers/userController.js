@@ -1,12 +1,14 @@
 const Batch = require('../models/Batch');
 const User = require('../models/User');
 const hashPassword = require('../utils/hash-password');
+const { createNewUser } = require('../utils/addUserUtils');
 const validator = require('validator');
+const expressAsyncHandler = require('express-async-handler');
 
 const addUser = async (req, res, next) => {
     try {
         const { name, email, password, contact, role, location } = req.body;
-        if (!name || !email || !password || !contact) {
+        if (!name || !email || !contact) {
             return res.status(400).json({
                 status: false,
                 message: 'All fields are required'
@@ -25,7 +27,7 @@ const addUser = async (req, res, next) => {
                 message: 'Email already exists'
             });
         }
-        if (password.length < 8) {
+        if (password && password.length < 8) {
             return res.status(400).json({
                 status: false,
                 message: 'Password should be at least 8 characters long'
@@ -38,7 +40,7 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        const hashedPassword = hashPassword(password);
+        const hashedPassword = hashPassword(password || '12345678');
 
         const newUser = new User({
             name,
@@ -64,9 +66,35 @@ const addUser = async (req, res, next) => {
     }
 };
 
+const bulkUploadUsers = expressAsyncHandler(async (req, res) => {
+    const { users } = req.body;
+    const addedUsers = [];
+
+    for (const user of users) {
+        try {
+            const existingUser = await User.findOne({ email: user.email });
+
+            if (!existingUser) {
+                const newUser = await createNewUser(user);
+                addedUsers.push(newUser);
+            }
+        } catch (error) {
+            console.error('Error adding user:', error);
+        }
+    }
+
+    return res.status(201).json({
+        status: true,
+        addedUsers,
+        skippedUsers,
+        message: 'Bulk upload completed with skipped users',
+    });
+});
+
+
 const getUsers = async (req, res, next) => {
     try {
-        const users = await User.find({}, { password: 0 });
+        const users = await User.find({ role: { $ne: 'customer' } }, { password: 0 });
         return res.status(200).json({
             status: true,
             data: users,
@@ -76,6 +104,23 @@ const getUsers = async (req, res, next) => {
         return res.status(500).json({
             status: false,
             message: 'Error fetching users',
+            error: JSON.stringify(error)
+        });
+    }
+};
+
+const getCustomers = async (req, res, next) => {
+    try {
+        const users = await User.find({ role: 'customer' }, { password: 0 });
+        return res.status(200).json({
+            status: true,
+            data: users,
+            message: 'Customers fetched successfully'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: 'Error fetching Customers',
             error: JSON.stringify(error)
         });
     }
@@ -197,5 +242,7 @@ module.exports = {
     getUsers,
     getUserById,
     updateUserById,
-    deleteUserById
+    deleteUserById,
+    getCustomers,
+    bulkUploadUsers
 };
