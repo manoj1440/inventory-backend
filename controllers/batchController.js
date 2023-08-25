@@ -77,6 +77,12 @@ const updateBatchById = async (req, res, next) => {
                 { $set: { included: true } }
             );
         }
+        if (updatedBatch && updates.diffPanels && updates.diffPanels.length > 0) {
+            await Panel.updateMany(
+                { _id: { $in: updates.diffPanels } },
+                { $set: { included: false } }
+            );
+        }
         return res.status(200).json({ status: true, data: updatedBatch, message: 'Batch updated successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error updating batch' });
