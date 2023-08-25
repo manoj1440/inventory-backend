@@ -1,3 +1,4 @@
+const Batch = require('../models/Batch');
 const User = require('../models/User');
 const hashPassword = require('../utils/hash-password');
 const validator = require('validator');
@@ -174,6 +175,10 @@ const deleteUserById = async (req, res, next) => {
                 message: 'User not found'
             });
         }
+        await Batch.updateMany(
+            { user: userId },
+            { $pull: { user: userId } }
+        );
         return res.status(200).json({
             status: true,
             message: 'User deleted successfully'

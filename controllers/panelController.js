@@ -1,4 +1,5 @@
 const Panel = require('../models/Panel');
+const Batch = require('../models/Batch');
 
 const addPanel = async (req, res, next) => {
     try {
@@ -77,6 +78,10 @@ const deletePanelById = async (req, res, next) => {
         if (!deletedPanel) {
             return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
         }
+        await Batch.updateMany(
+            { panels: panelId },
+            { $pull: { panels: panelId } }
+        );
         return res.status(200).json({ status: true, data: null, message: 'Panel deleted successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error deleting panel' });
