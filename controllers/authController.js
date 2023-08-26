@@ -36,7 +36,7 @@ const login = async (req, res, next) => {
             res.cookie('token', token, {
                 maxAge: expiresIn * 1000,
                 sameSite: 'none',
-                secure: secure,
+                secure: true,
                 domain: domain,
                 path: '/',
             });
