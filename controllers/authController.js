@@ -23,7 +23,11 @@ const login = async (req, res, next) => {
             process.env.JWT_SECRET,
             { expiresIn });
 
-        res.cookie('token', token, { maxAge: expiresIn * 1000 });
+        res.cookie('token', token, {
+            maxAge: expiresIn * 1000,
+            sameSite: 'none',
+            secure: process.env.NODE_ENV !== 'production' ? false : true
+        });
         return res.send({
             status: true,
             message: 'success',
