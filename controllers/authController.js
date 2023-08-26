@@ -23,11 +23,22 @@ const login = async (req, res, next) => {
             process.env.JWT_SECRET,
             { expiresIn });
 
-        res.cookie('token', token, {
-            maxAge: expiresIn * 1000,
-            sameSite: 'none',
-            secure: process.env.NODE_ENV !== 'production' ? false : true
-        });
+        const isLocal = process.env.NODE_ENV !== 'production';
+        const domain = process.env.COOKIE_DOMAIN || 'azurewebsites.net';
+        if (isLocal) {
+            res.cookie('token', token, {
+                maxAge: expiresIn * 1000
+            });
+        } else {
+            res.cookie('token', token, {
+                maxAge: expiresIn * 1000,
+                sameSite: 'none',
+                secure: secure,
+                domain: domain,
+                path: '/',
+            });
+        }
+
         return res.send({
             status: true,
             message: 'success',
