@@ -7,8 +7,11 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const indexRoutes = require('./routes/indexRoutes');
 
 const app = express();
+
+console.log('process.env.MONGO_URI===',process.env.MONGO_URI);
+
 const PORT = process.env.PORT || 4000;
-const MONGODB_URI = `mongodb://${process.env.MONGODB_HOST_NAME}:${process.env.MONGODB_PORT}/${process.env.MONGODB_NAME}`;
+const MONGODB_URI = process.env.MONGO_URI;
 
 app.use(require('helmet')());
 app.use(require('compression')());
