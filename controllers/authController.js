@@ -26,7 +26,7 @@ const login = async (req, res, next) => {
         const isLocal = process.env.NODE_ENV !== 'production';
         const domain = process.env.COOKIE_DOMAIN || 'azurestaticapps.net';
 
-        console.log('domain===', domain);
+        console.log('domain==new=', domain);
 
         if (isLocal) {
             res.cookie('token', token, {
