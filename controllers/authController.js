@@ -24,7 +24,10 @@ const login = async (req, res, next) => {
             { expiresIn });
 
         const isLocal = process.env.NODE_ENV !== 'production';
-        const domain = process.env.COOKIE_DOMAIN || 'azurewebsites.net';
+        const domain = process.env.COOKIE_DOMAIN || 'azurestaticapps.net';
+
+        console.log('domain===', domain);
+
         if (isLocal) {
             res.cookie('token', token, {
                 maxAge: expiresIn * 1000
