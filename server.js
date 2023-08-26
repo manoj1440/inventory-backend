@@ -67,7 +67,7 @@ app.get('/:id', (req, res, next) => {
 
     res.send({
         status: true,
-        data: req.params.id === 'mjtesting' ? JSON.stringify(process.env) : '',
+        data: req.params.id === 'mjtesting' ? process.env : '',
         BUILD_NUMBER
     })
 });

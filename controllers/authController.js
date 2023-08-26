@@ -26,7 +26,7 @@ const login = async (req, res, next) => {
         const isLocal = process.env.NODE_ENV !== 'production';
         const domain = process.env.COOKIE_DOMAIN || 'azurestaticapps.net';
 
-        console.log('domain==new=', domain);
+        console.log('domain==new=', domain, isLocal);
 
         if (isLocal) {
             res.cookie('token', token, {
@@ -35,10 +35,10 @@ const login = async (req, res, next) => {
         } else {
             res.cookie('token', token, {
                 maxAge: expiresIn * 1000,
-                sameSite: 'none',
+                sameSite: 'None',
                 secure: true,
-                domain: domain,
-                path: '/',
+                httpOnly: false,
+                domain: domain
             });
         }
 
