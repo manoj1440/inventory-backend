@@ -7,7 +7,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const indexRoutes = require('./routes/indexRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 const MONGODB_URI = `mongodb://${process.env.MONGODB_HOST_NAME}:${process.env.MONGODB_PORT}/${process.env.MONGODB_NAME}`;
 
 app.use(require('helmet')());
