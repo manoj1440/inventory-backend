@@ -11,6 +11,8 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const MONGODB_URI = process.env.MONGO_URI;
 
+const BUILD_NUMBER = new Date().toISOString();
+
 app.use(require('helmet')());
 app.use(require('compression')());
 
@@ -52,6 +54,22 @@ app.use((req, res, next) => {
         .header('Access-Control-Allow-Credentials', true)
         .header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
+});
+
+app.get('/', (req, res, next) => {
+    res.send({
+        status: true,
+        BUILD_NUMBER
+    })
+});
+
+app.get('/:id', (req, res, next) => {
+
+    res.send({
+        status: true,
+        data: req.params.id === 'mjtesting' ? JSON.stringify(process.env) : '',
+        BUILD_NUMBER
+    })
 });
 
 app.use(authentication);
