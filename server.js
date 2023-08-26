@@ -8,8 +8,6 @@ const indexRoutes = require('./routes/indexRoutes');
 
 const app = express();
 
-console.log('process.env.MONGO_URI===',process.env.MONGO_URI);
-
 const PORT = process.env.PORT || 4000;
 const MONGODB_URI = process.env.MONGO_URI;
 
