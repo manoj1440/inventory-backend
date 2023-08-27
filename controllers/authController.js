@@ -24,10 +24,6 @@ const login = async (req, res, next) => {
             { expiresIn });
 
         const isLocal = process.env.NODE_ENV !== 'production';
-        const domain = process.env.COOKIE_DOMAIN || 'azurestaticapps.net';
-
-        console.log('domain==new=', domain, isLocal);
-
         if (isLocal) {
             res.cookie('token', token, {
                 maxAge: expiresIn * 1000
@@ -35,10 +31,9 @@ const login = async (req, res, next) => {
         } else {
             res.cookie('token', token, {
                 maxAge: expiresIn * 1000,
-                sameSite: 'None',
-                secure: true,
-                httpOnly: false,
-                domain: domain
+                httpOnly: true,
+                secure: true, // Set this to true for HTTPS connections
+                sameSite: 'none' // Required for cross-site cookies
             });
         }
 
@@ -58,7 +53,18 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        res.clearCookie('token');
+        const isLocal = process.env.NODE_ENV !== 'production';
+
+        if (isLocal) {
+            res.clearCookie('token');
+        } else {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: true, // Use 'false' for non-HTTPS connections during development
+                sameSite: 'none', // Use 'Lax' for non-HTTPS connections during development
+            });
+        }
+
         return res.send({
             status: true,
             message: 'Logged out successfully',
