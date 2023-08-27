@@ -86,7 +86,6 @@ const bulkUploadUsers = expressAsyncHandler(async (req, res) => {
     return res.status(201).json({
         status: true,
         addedUsers,
-        skippedUsers,
         message: 'Bulk upload completed with skipped users',
     });
 });
