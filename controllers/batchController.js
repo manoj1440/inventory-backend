@@ -1,5 +1,7 @@
+const expressAsyncHandler = require('express-async-handler');
 const Batch = require('../models/Batch');
 const Panel = require('../models/Panel');
+const { createNewBatch } = require('../utils/addBatchesUtils');
 
 const addBatch = async (req, res, next) => {
     try {
@@ -38,6 +40,30 @@ const addBatch = async (req, res, next) => {
         return res.status(500).json({ status: false, data: null, message: 'Error adding batch' });
     }
 };
+
+const bulkUploadBatch = expressAsyncHandler(async (req, res) => {
+    const { batches } = req.body;
+    const addedBatches = [];
+
+    for (const batch of batches) {
+        try {
+            const existingBatch = await Batch.findOne({ AssetNumber: batch.AssetNumber });
+
+            if (!existingBatch) {
+                const newBatch = await createNewBatch(batch);
+                addedBatches.push(newBatch);
+            }
+        } catch (error) {
+            console.error('Error adding Batch:', error);
+        }
+    }
+
+    return res.status(201).json({
+        status: true,
+        addedBatches,
+        message: 'Bulk upload completed with skipped Batches',
+    });
+});
 
 const getBatches = async (req, res, next) => {
     try {
@@ -118,4 +144,5 @@ module.exports = {
     getBatchById,
     updateBatchById,
     deleteBatchById,
+    bulkUploadBatch
 };

@@ -12,7 +12,7 @@ const createNewUser = async (userData) => {
         throw new Error('Invalid email format');
     }
 
-    const hashedPassword = hashPassword(password || '12345678');
+    const hashedPassword = hashPassword(`${password}` || '12345678');
 
     let locationArr = [];
 

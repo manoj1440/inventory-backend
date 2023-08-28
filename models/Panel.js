@@ -6,6 +6,14 @@ const panelSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    receivedAt: {
+        type: Date,
+        default: null,
+    },
+    received: {
+        type: Boolean,
+        default: false,
+    },
     DOM: Date,
     DOE: Date,
     included: {

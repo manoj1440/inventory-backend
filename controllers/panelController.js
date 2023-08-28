@@ -1,5 +1,7 @@
 const Panel = require('../models/Panel');
 const Batch = require('../models/Batch');
+const expressAsyncHandler = require('express-async-handler');
+const { createNewPanel } = require('../utils/addPanelUtils');
 
 const addPanel = async (req, res, next) => {
     try {
@@ -25,6 +27,30 @@ const addPanel = async (req, res, next) => {
         return res.status(500).json({ status: false, data: null, message: 'Error adding panel' });
     }
 };
+
+const bulkUploadPanels = expressAsyncHandler(async (req, res) => {
+    const { panels } = req.body;
+    const addedPanels = [];
+
+    for (const panel of panels) {
+        try {
+            const existingPanel = await Panel.findOne({ serialNumber: panel.serialNumber });
+
+            if (!existingPanel) {
+                const newPanel = await createNewPanel(panel);
+                addedPanels.push(newPanel);
+            }
+        } catch (error) {
+            console.error('Error adding panels:', error);
+        }
+    }
+
+    return res.status(201).json({
+        status: true,
+        addedPanels,
+        message: 'Bulk upload completed with skipped Panels',
+    });
+});
 
 const getPanels = async (req, res, next) => {
     try {
@@ -103,5 +129,6 @@ module.exports = {
     getPanelById,
     updatePanelById,
     deletePanelById,
-    getPanelsForBatch
+    getPanelsForBatch,
+    bulkUploadPanels
 };

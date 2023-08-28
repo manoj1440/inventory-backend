@@ -2,11 +2,15 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const batchSchema = new Schema({
+    AssetNumber: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     panels: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'Panel',
-            required: true,
+            ref: 'Panel'
         },
     ],
     createdAt: {
@@ -21,16 +25,10 @@ const batchSchema = new Schema({
         type: Boolean,
         default: false,
     },
-    AssetNumber: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    user: [{
+    user: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    }],
+        ref: 'User'
+    },
     PCM: String,
     DOM: Date,
     Dispatched: Date,
