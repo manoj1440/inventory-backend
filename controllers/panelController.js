@@ -1,7 +1,7 @@
 const Panel = require('../models/Panel');
 const Batch = require('../models/Batch');
 const expressAsyncHandler = require('express-async-handler');
-const { createNewPanel } = require('../utils/addPanelUtils');
+const { createNewPanel } = require('../utils/bulkUpload');
 
 const addPanel = async (req, res, next) => {
     try {

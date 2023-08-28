@@ -1,9 +1,9 @@
 const Batch = require('../models/Batch');
 const User = require('../models/User');
 const hashPassword = require('../utils/hash-password');
-const { createNewUser } = require('../utils/addUserUtils');
 const validator = require('validator');
 const expressAsyncHandler = require('express-async-handler');
+const { createNewUser } = require('../utils/bulkUpload');
 
 const addUser = async (req, res, next) => {
     try {

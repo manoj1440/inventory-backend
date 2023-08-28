@@ -1,7 +1,7 @@
 const expressAsyncHandler = require('express-async-handler');
 const Batch = require('../models/Batch');
 const Panel = require('../models/Panel');
-const { createNewBatch } = require('../utils/addBatchesUtils');
+const { createNewBatch } = require('../utils/bulkUpload');
 
 const addBatch = async (req, res, next) => {
     try {
