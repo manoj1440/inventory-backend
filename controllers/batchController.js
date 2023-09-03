@@ -41,6 +41,66 @@ const addBatch = async (req, res, next) => {
     }
 };
 
+const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
+    try {
+        const { AssetNumber, panels } = req.body;
+
+        if (!AssetNumber || !panels || !Array.isArray(panels) || panels.length === 0) {
+            return res.status(400).json({
+                status: false,
+                data: null,
+                message: 'Asset number and a non-empty array of panels are required',
+            });
+        }
+
+        const existingBatch = await Batch.findOne({ AssetNumber });
+        if (existingBatch) {
+            return res.status(400).json({
+                status: false,
+                data: null,
+                message: 'Asset number already exists',
+            });
+        }
+        const uniquePanels = Array.from(new Set(panels));
+
+        const panelObjects = await Panel.find({ serialNumber: { $in: uniquePanels } });
+
+        const panelIds = panelObjects.map((panel) => panel._id);
+
+        if (panelIds.length !== uniquePanels.length) {
+            const missingPanels = uniquePanels.filter((serialNumber) =>
+                !panelIds.includes(panelObjects.find((panel) => panel.serialNumber === serialNumber)._id)
+            );
+
+            const newPanels = await Panel.insertMany(
+                missingPanels.map((serialNumber) => ({ serialNumber, included: true }))
+            );
+
+            panelIds.push(...newPanels.map((panel) => panel._id));
+        }
+
+        const newBatch = new Batch({
+            panels: panelIds,
+            AssetNumber,
+        });
+
+        const savedBatch = await newBatch.save();
+
+        return res.status(201).json({
+            status: true,
+            data: savedBatch,
+            message: 'Batch created successfully',
+        });
+    } catch (error) {
+        console.error('Error creating batch:', error);
+        return res.status(500).json({
+            status: false,
+            data: null,
+            message: 'Error creating batch',
+        });
+    }
+});
+
 const bulkUploadBatch = expressAsyncHandler(async (req, res) => {
     const { batches } = req.body;
     const addedBatches = [];
@@ -144,5 +204,6 @@ module.exports = {
     getBatchById,
     updateBatchById,
     deleteBatchById,
-    bulkUploadBatch
+    bulkUploadBatch,
+    scanToCreateBatch
 };

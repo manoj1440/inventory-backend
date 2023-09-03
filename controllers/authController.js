@@ -5,7 +5,7 @@ const login = async (req, res, next) => {
 
     try {
         const { password, email } = req.body;
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email, role: { $ne: "customer" } });
 
         if (!user) {
             return res.send({ status: false, message: 'Invalid email' });
