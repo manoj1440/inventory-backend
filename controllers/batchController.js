@@ -178,7 +178,7 @@ const updateBatchByName = async (req, res, next) => {
     try {
         const { AssetNumber } = req.body;
 
-        if (!updatedBatch) {
+        if (!AssetNumber) {
             return res.status(404).json({ status: false, data: null, message: 'AssetNumber can not blank' });
         }
 
