@@ -18,7 +18,8 @@ const addPanel = async (req, res, next) => {
 
         const newPanel = new Panel({
             serialNumber,
-            DOE, DOM
+            DOE: DOE || null,
+            DOM: DOM || null
         });
 
         const savedPanel = await newPanel.save();
@@ -106,6 +107,26 @@ const updatePanelById = async (req, res, next) => {
     }
 };
 
+const updatePanelByName = async (req, res, next) => {
+    try {
+        const { serialNumber } = req.body;
+
+        if (!serialNumber) {
+            return res.status(404).json({ status: false, data: null, message: 'serialNumber can not blank' });
+        }
+
+        const updates = req.body;
+
+        const updatedPanel = await Panel.findOneAndUpdate({ serialNumber }, updates, { new: true });
+        if (!updatedPanel) {
+            return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
+        }
+        return res.status(200).json({ status: true, data: updatedPanel, message: 'Panel updated successfully' });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: null, message: 'Error updating panel' });
+    }
+};
+
 const deletePanelById = async (req, res, next) => {
     try {
         const panelId = req.params.id;
@@ -130,5 +151,6 @@ module.exports = {
     updatePanelById,
     deletePanelById,
     getPanelsForBatch,
-    bulkUploadPanels
+    bulkUploadPanels,
+    updatePanelByName
 };
