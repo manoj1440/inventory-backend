@@ -17,6 +17,10 @@ const batchSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    dispatchedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     receivedAt: {
         type: Date,
         default: null,

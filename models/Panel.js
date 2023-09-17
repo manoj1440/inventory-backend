@@ -16,6 +16,7 @@ const panelSchema = new mongoose.Schema({
     },
     DOM: Date,
     DOE: Date,
+    PCM: String,
     included: {
         type: Boolean,
         default: false

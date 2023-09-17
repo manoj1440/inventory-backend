@@ -5,7 +5,7 @@ const { createNewPanel } = require('../utils/bulkUpload');
 
 const addPanel = async (req, res, next) => {
     try {
-        const { serialNumber, DOE, DOM } = req.body;
+        const { serialNumber, DOE, DOM, PCM } = req.body;
 
         if (!serialNumber) {
             return res.status(400).json({ status: false, data: null, message: 'Serial number is required' });
@@ -19,7 +19,8 @@ const addPanel = async (req, res, next) => {
         const newPanel = new Panel({
             serialNumber,
             DOE: DOE || null,
-            DOM: DOM || null
+            DOM: DOM || null,
+            PCM: PCM || null
         });
 
         const savedPanel = await newPanel.save();

@@ -127,7 +127,10 @@ const bulkUploadBatch = expressAsyncHandler(async (req, res) => {
 
 const getBatches = async (req, res, next) => {
     try {
-        const batches = await Batch.find().populate('panels user');
+        const batches = await Batch.find().populate({
+            path: 'panels user dispatchedBy',
+            select: '-password',
+        });
         return res.status(200).json({ status: true, data: batches, message: 'Batches fetched successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error fetching batches' });
@@ -137,7 +140,10 @@ const getBatches = async (req, res, next) => {
 const getBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
-        const batch = await Batch.findById(batchId).populate('panels user');
+        const batch = await Batch.findById(batchId).populate({
+            path: 'panels user dispatchedBy',
+            select: '-password',
+        });
         if (!batch) {
             return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
         }
@@ -151,6 +157,7 @@ const updateBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
         const updates = req.body;
+        updates['dispatchedBy'] = req.userData.user._id;
 
         const updatedBatch = await Batch.findByIdAndUpdate(batchId, updates, { new: true }).populate('panels user');
         if (!updatedBatch) {
@@ -183,18 +190,33 @@ const updateBatchByName = async (req, res, next) => {
         }
 
         const updates = req.body;
+        updates['dispatchedBy'] = req.userData.user._id;
 
-        const updatedBatch = await Batch.findOneAndUpdate({ AssetNumber }, updates, { new: true }).populate('panels user');
-        if (!updatedBatch) {
-            return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
+        if (Array.isArray(AssetNumber)) {
+            const updatedBatches = updatedBatches = await Batch.updateMany(
+                { AssetNumber: { $in: AssetNumber } },
+                updates,
+                { new: true }
+            ).populate('panels user');
+            if (updatedBatches.n === 0) {
+                return res.status(404).json({ status: false, data: null, message: 'Batches not found' });
+            }
+        } else {
+            const updatedBatch = await Batch.findOneAndUpdate(
+                { AssetNumber }, updates, { new: true })
+                .populate('panels user');
+            if (!updatedBatch) {
+                return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
+            }
         }
-        if (updatedBatch && updates.panels && updates.panels.length > 0) {
+
+        if (updates.panels && updates.panels.length > 0) {
             await Panel.updateMany(
                 { _id: { $in: updates.panels } },
                 { $set: { included: true } }
             );
         }
-        if (updatedBatch && updates.diffPanels && updates.diffPanels.length > 0) {
+        if (updates.diffPanels && updates.diffPanels.length > 0) {
             await Panel.updateMany(
                 { _id: { $in: updates.diffPanels } },
                 { $set: { included: false, received: null, receivedAt: null } }
