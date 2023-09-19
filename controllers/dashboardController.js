@@ -7,6 +7,7 @@ const getDashboardData = async (req, res, next) => {
         const totalBatches = await Batch.countDocuments();
         const totalPanels = await Panel.countDocuments();
         const totalPanelsInBatch = await Panel.countDocuments({ included: true });
+        const totalReceivedPanels = await Panel.countDocuments({ received: true });
         const totalReceivedBatches = await Batch.countDocuments({ received: true });
 
         const userOverview = await User.aggregate([
@@ -39,6 +40,7 @@ const getDashboardData = async (req, res, next) => {
                 totalPanels,
                 totalPanelsInBatch,
                 totalReceivedBatches,
+                totalReceivedPanels,
                 userOverview,
             },
             message: 'Dashboard data retrieved successfully',
