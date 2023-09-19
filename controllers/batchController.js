@@ -137,6 +137,19 @@ const getBatches = async (req, res, next) => {
     }
 };
 
+const getMyBatches = async (req, res, next) => {
+    try {
+        const userId = req.userData.user._id;
+        const batches = await Batch.find({ dispatchedBy: userId }).populate({
+            path: 'panels user dispatchedBy',
+            select: '-password',
+        });
+        return res.status(200).json({ status: true, data: batches, message: 'Batches fetched successfully' });
+    } catch (error) {
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching batches' });
+    }
+};
+
 const getBatchById = async (req, res, next) => {
     try {
         const batchId = req.params.id;
@@ -185,46 +198,27 @@ const updateBatchByName = async (req, res, next) => {
     try {
         const { AssetNumber } = req.body;
 
-        if (!AssetNumber) {
-            return res.status(404).json({ status: false, data: null, message: 'AssetNumber can not blank' });
+        if (!AssetNumber || (Array.isArray(AssetNumber) && AssetNumber.length === 0)) {
+            return res.status(404).json({ status: false, data: null, message: 'AssetNumber can not be blank' });
         }
 
         const updates = req.body;
         updates['dispatchedBy'] = req.userData.user._id;
-
-        if (Array.isArray(AssetNumber)) {
-            const updatedBatches = updatedBatches = await Batch.updateMany(
-                { AssetNumber: { $in: AssetNumber } },
-                updates,
-                { new: true }
-            ).populate('panels user');
-            if (updatedBatches.n === 0) {
-                return res.status(404).json({ status: false, data: null, message: 'Batches not found' });
-            }
-        } else {
-            const updatedBatch = await Batch.findOneAndUpdate(
-                { AssetNumber }, updates, { new: true })
-                .populate('panels user');
-            if (!updatedBatch) {
-                return res.status(404).json({ status: false, data: null, message: 'Batch not found' });
-            }
+        delete updates['AssetNumber'];
+        const AssetNumberArray = Array.isArray(AssetNumber)
+            && AssetNumber.length > 0 ? AssetNumber : [AssetNumber]
+        const updatedBatches = await Batch.updateMany(
+            { AssetNumber: { $in: AssetNumberArray } },
+            updates,
+            { new: true }
+        ).populate('panels user');
+        if (updatedBatches.matchedCount === 0) {
+            return res.status(404).json({ status: false, data: null, message: 'Batches not found' });
         }
 
-        if (updates.panels && updates.panels.length > 0) {
-            await Panel.updateMany(
-                { _id: { $in: updates.panels } },
-                { $set: { included: true } }
-            );
-        }
-        if (updates.diffPanels && updates.diffPanels.length > 0) {
-            await Panel.updateMany(
-                { _id: { $in: updates.diffPanels } },
-                { $set: { included: false, received: null, receivedAt: null } }
-            );
-        }
-        return res.status(200).json({ status: true, data: updatedBatch, message: 'Batch updated successfully' });
+        return res.status(200).json({ status: true, data: updatedBatches, message: 'Batch updated successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, data: null, message: 'Error updating batch' });
+        return res.status(500).json({ status: false, data: null, message: 'Error updating batch' + error });
     }
 };
 
@@ -262,5 +256,6 @@ module.exports = {
     deleteBatchById,
     bulkUploadBatch,
     scanToCreateBatch,
-    updateBatchByName
+    updateBatchByName,
+    getMyBatches
 };
