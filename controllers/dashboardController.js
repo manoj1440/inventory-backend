@@ -28,6 +28,7 @@ const getDashboardData = async (req, res, next) => {
                 $project: {
                     name: 1,
                     role: 1,
+                    userBatches: 1,
                     numBatchesCreated: { $size: '$userBatches' }
                 },
             },
