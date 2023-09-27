@@ -31,7 +31,7 @@ const addBatch = async (req, res, next) => {
         if (savedBatch) {
             await Panel.updateMany(
                 { _id: { $in: panels } },
-                { $set: { included: true } }
+                { $set: { included: true, received: null, receivedAt: null } }
             );
         }
 
@@ -85,6 +85,12 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
         });
 
         const savedBatch = await newBatch.save();
+        if (savedBatch) {
+            await Panel.updateMany(
+                { _id: { $in: panelIds } },
+                { $set: { received: null, receivedAt: null, included: true } }
+            );
+        }
 
         return res.status(201).json({
             status: true,

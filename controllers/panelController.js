@@ -70,11 +70,11 @@ const getPanels = async (req, res, next) => {
     }
 };
 
-
 const getPanelsForBatch = async (req, res, next) => {
     try {
         const panels = await Panel.find({ included: false });
-        return res.status(200).json({ status: true, data: panels, message: 'Panels fetched successfully' });
+        const panel2 = await Panel.find({ included: true, received: true });
+        return res.status(200).json({ status: true, data: [...panels, ...panel2], message: 'Panels fetched successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' });
     }
@@ -102,6 +102,12 @@ const updatePanelById = async (req, res, next) => {
         if (!updatedPanel) {
             return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
         }
+        if (updates.included === false) {
+            await Batch.updateMany(
+                { panels: panelId },
+                { $pull: { panels: panelId } }
+            );
+        }
         return res.status(200).json({ status: true, data: updatedPanel, message: 'Panel updated successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error updating panel' });
@@ -121,6 +127,12 @@ const updatePanelByName = async (req, res, next) => {
         const updatedPanel = await Panel.findOneAndUpdate({ serialNumber }, updates, { new: true });
         if (!updatedPanel) {
             return res.status(404).json({ status: false, data: null, message: 'Panel not found' });
+        }
+        if (updates.included === false) {
+            await Batch.updateMany(
+                { panels: updatedPanel._id },
+                { $pull: { panels: updatedPanel._id } }
+            );
         }
         return res.status(200).json({ status: true, data: updatedPanel, message: 'Panel updated successfully' });
     } catch (error) {
