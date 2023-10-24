@@ -26,7 +26,7 @@ const addPanel = async (req, res, next) => {
         const savedPanel = await newPanel.save();
         return res.status(201).json({ status: true, data: savedPanel, message: 'Panel created successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, data: null, message: 'Error adding panel' + error });
+        return res.status(500).json({ status: false, data: null, message: 'Error in adding panel', error: JSON.stringify(error) });
     }
 };
 
