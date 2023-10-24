@@ -6,7 +6,7 @@ const { createNewPanel } = require('../utils/bulkUpload');
 const addPanel = async (req, res, next) => {
     try {
         const { serialNumber,
-            // DOE,
+            DOE,
             DOM, PCM } = req.body;
 
         if (!serialNumber) {
@@ -20,7 +20,7 @@ const addPanel = async (req, res, next) => {
 
         const newPanel = new Panel({
             serialNumber,
-            // DOE: DOE || null,
+            DOE: DOE || null,
             DOM: DOM || null,
             PCM: PCM || null
         });
