@@ -34,26 +34,53 @@ const addPanel = async (req, res, next) => {
 
 const bulkUploadPanels = expressAsyncHandler(async (req, res) => {
     const { panels } = req.body;
-    const addedPanels = [];
 
-    for (const panel of panels) {
-        try {
-            const existingPanel = await Panel.findOne({ serialNumber: panel.serialNumber });
-
-            if (!existingPanel) {
-                const newPanel = await createNewPanel(panel);
-                addedPanels.push(newPanel);
-            }
-        } catch (error) {
-            console.error('Error adding panels:', error);
-        }
+    if (!panels || panels.length === 0) {
+        return res.status(400).json({
+            status: false,
+            message: 'No panels provided for bulk upload.',
+        });
     }
 
-    return res.status(201).json({
-        status: true,
-        addedPanels,
-        message: 'Bulk upload completed with skipped Panels',
-    });
+    try {
+        const serialNumbers = panels.map(panel => panel.serialNumber);
+        const existingPanels = await Panel.find({ serialNumber: { $in: serialNumbers } });
+
+        // Create a map of existing panels for quick look-up
+        const existingPanelMap = {};
+        existingPanels.forEach(existingPanel => {
+            existingPanelMap[existingPanel.serialNumber] = existingPanel;
+        });
+
+        const newPanels = [];
+        const skippedPanels = [];
+
+        for (const panel of panels) {
+            if (!existingPanelMap[panel.serialNumber]) {
+                newPanels.push(panel);
+            } else {
+                skippedPanels.push(panel);
+            }
+        }
+
+        // Insert new panels in bulk
+        if (newPanels.length > 0) {
+            await Panel.insertMany(newPanels);
+        }
+
+        return res.status(201).json({
+            status: true,
+            addedPanels: newPanels,
+            skippedPanels,
+            message: 'Bulk upload completed with skipped panels.',
+        });
+    } catch (error) {
+        console.error('Error adding panels:', error);
+        return res.status(500).json({
+            status: false,
+            message: 'Internal Server Error',
+        });
+    }
 });
 
 const getPanels = async (req, res, next) => {
