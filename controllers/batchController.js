@@ -73,7 +73,7 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
 
         if (panelIds.length !== uniquePanels.length) {
             const missingPanels = uniquePanels.filter((serialNumber) =>
-                !panelIds.includes(panelObjects.find((panel) => panel.serialNumber === serialNumber)._id)
+                !panelIds.includes(panelObjects.find((panel) => panel.serialNumber === serialNumber)?._id)
             );
 
             const newPanels = await Panel.insertMany(
@@ -106,7 +106,7 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
         return res.status(200).json({
             status: false,
             data: null,
-            message: 'Error creating batch', error: error
+            message: 'Error creating batch', error: JSON.stringify(error)
         });
     }
 });
