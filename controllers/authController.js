@@ -47,7 +47,7 @@ const login = async (req, res, next) => {
         });
     } catch (err) {
         console.error('Error in login:', err);
-        return res.status(500).send({ status: false, message: 'An error occurred' });
+        return res.status(500).send({ status: false, message: 'An error occurred', error: err });
     }
 }
 
@@ -71,7 +71,7 @@ const logout = async (req, res, next) => {
             data: null
         });
     } catch (err) {
-        return res.status(500).send({ status: false, message: 'An error occurred' });
+        return res.status(500).send({ status: false, message: 'An error occurred', error: err });
     }
 }
 
