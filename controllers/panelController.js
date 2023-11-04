@@ -85,7 +85,22 @@ const bulkUploadPanels = expressAsyncHandler(async (req, res) => {
 
 const getPanels = async (req, res, next) => {
     try {
-        const panels = await Panel.find();
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        const nameFilter = req.query.search && req.query.search.trim().length > 0 ? { serialNumber: { $regex: new RegExp(req.query.search, 'i') } } : {};
+
+        const totalPanels = await Panel.countDocuments(nameFilter);
+
+        let panels;
+        if (req.query.page && req.query.page.trim().length > 0) {
+            panels = await Panel.find(nameFilter)
+                .skip((page - 1) * pageSize)
+                .limit(pageSize);
+        } else {
+            panels = await Panel.find(nameFilter)
+        }
+
         const panelsWithAssetNumber = await Promise.all(panels.map(async (panel) => {
             const batch = await Batch.findOne({ panels: panel._id }).select('AssetNumber');
             return {
@@ -93,11 +108,18 @@ const getPanels = async (req, res, next) => {
                 AssetNumber: batch ? batch.AssetNumber : null,
             };
         }));
-        return res.status(200).json({ status: true, data: panelsWithAssetNumber, message: 'Panels fetched successfully' });
+
+        return res.status(200).json({
+            status: true,
+            data: panelsWithAssetNumber,
+            message: 'Panels fetched successfully',
+            total: totalPanels,
+        });
     } catch (error) {
-        return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' });
+        return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' + error });
     }
 };
+
 
 const getPanelsForBatch = async (req, res, next) => {
     try {
