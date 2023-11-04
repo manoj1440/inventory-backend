@@ -37,7 +37,7 @@ const addBatch = async (req, res, next) => {
 
         return res.status(201).json({ status: true, data: savedBatch, message: 'Batch created successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, data: null, message: 'Error adding batch', error: error });
+        return res.status(200).json({ status: false, data: null, message: 'Error adding batch', error: error });
     }
 };
 
@@ -103,7 +103,7 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
         });
     } catch (error) {
         console.error('Error creating batch:', error);
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             data: null,
             message: 'Error creating batch', error: error
@@ -143,7 +143,7 @@ const getBatches = async (req, res, next) => {
         });
         return res.status(200).json({ status: true, data: batches, message: 'Batches fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching batches' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching batches' });
     }
 };
 
@@ -156,7 +156,7 @@ const getMyBatches = async (req, res, next) => {
         });
         return res.status(200).json({ status: true, data: batches, message: 'Batches fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching batches' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching batches' });
     }
 };
 
@@ -172,7 +172,7 @@ const getBatchById = async (req, res, next) => {
         }
         return res.status(200).json({ status: true, data: batch, message: 'Batch fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching batch' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching batch' });
     }
 };
 
@@ -200,7 +200,7 @@ const updateBatchById = async (req, res, next) => {
         }
         return res.status(200).json({ status: true, data: updatedBatch, message: 'Batch updated successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error updating batch' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error updating batch' });
     }
 };
 
@@ -228,7 +228,7 @@ const updateBatchByName = async (req, res, next) => {
 
         return res.status(200).json({ status: true, data: updatedBatches, message: 'Batch updated successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error updating batch' + error });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error updating batch' + error });
     }
 };
 
@@ -254,7 +254,7 @@ const deleteBatchById = async (req, res, next) => {
 
         return res.status(200).json({ status: true, data: null, message: 'Batch deleted successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error deleting batch' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error deleting batch' });
     }
 };
 

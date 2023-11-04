@@ -58,7 +58,7 @@ const addUser = async (req, res, next) => {
             message: 'User added successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Error adding user',
             error: JSON.stringify(error)
@@ -100,7 +100,7 @@ const getUsers = async (req, res, next) => {
             message: 'Users fetched successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Error fetching users',
             error: JSON.stringify(error)
@@ -117,7 +117,7 @@ const getCustomers = async (req, res, next) => {
             message: 'Customers fetched successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Error fetching Customers',
             error: JSON.stringify(error)
@@ -141,7 +141,7 @@ const getUserById = async (req, res, next) => {
             message: 'User fetched successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Error fetching user',
             error: JSON.stringify(error)
@@ -201,7 +201,7 @@ const updateUserById = async (req, res, next) => {
             message: 'User updated successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Error updating user',
             error: JSON.stringify(error)
@@ -228,7 +228,7 @@ const deleteUserById = async (req, res, next) => {
             message: 'User deleted successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Error deleting user',
             error: JSON.stringify(error)

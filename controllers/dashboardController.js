@@ -47,7 +47,7 @@ const getDashboardData = async (req, res, next) => {
             message: 'Dashboard data retrieved successfully',
         });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching dashboard data' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching dashboard data' });
     }
 };
 

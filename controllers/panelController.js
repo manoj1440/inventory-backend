@@ -28,7 +28,7 @@ const addPanel = async (req, res, next) => {
         const savedPanel = await newPanel.save();
         return res.status(201).json({ status: true, data: savedPanel, message: 'Panel created successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error adding panel', error: error });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error adding panel', error: error });
     }
 };
 
@@ -76,7 +76,7 @@ const bulkUploadPanels = expressAsyncHandler(async (req, res) => {
         });
     } catch (error) {
         console.error('Error adding panels:', error);
-        return res.status(500).json({
+        return res.status(200).json({
             status: false,
             message: 'Internal Server Error', error: error
         });
@@ -116,7 +116,7 @@ const getPanels = async (req, res, next) => {
             total: totalPanels,
         });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching panels' + error });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching panels' + error });
     }
 };
 
@@ -128,7 +128,7 @@ const getPanelsForBatch = async (req, res, next) => {
         const panelsData = [...panels, ...panel2].filter(item => item.isActive);
         return res.status(200).json({ status: true, data: panelsData, message: 'Panels fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching panels' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching panels' });
     }
 };
 
@@ -141,7 +141,7 @@ const getPanelById = async (req, res, next) => {
         }
         return res.status(200).json({ status: true, data: panel, message: 'Panel fetched successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching panel' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching panel' });
     }
 };
 
@@ -162,7 +162,7 @@ const updatePanelById = async (req, res, next) => {
         }
         return res.status(200).json({ status: true, data: updatedPanel, message: 'Panel updated successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error updating panel' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error updating panel' });
     }
 };
 
@@ -188,7 +188,7 @@ const updatePanelByName = async (req, res, next) => {
         }
         return res.status(200).json({ status: true, data: updatedPanel, message: 'Panel updated successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error updating panel' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error updating panel' });
     }
 };
 
@@ -205,7 +205,7 @@ const deletePanelById = async (req, res, next) => {
         );
         return res.status(200).json({ status: true, data: null, message: 'Panel deleted successfully' });
     } catch (error) {
-        return res.status(500).json({ status: false, error: error, data: null, message: 'Error deleting panel' });
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error deleting panel' });
     }
 };
 
