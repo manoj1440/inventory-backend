@@ -64,8 +64,12 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
         const uniquePanels = Array.from(new Set(panels));
 
         const panelObjects = await Panel.find({ serialNumber: { $in: uniquePanels } });
+        const activePanelObjects = panelObjects.filter(item => item.isActive);
 
         const panelIds = panelObjects.map((panel) => panel._id);
+        const activePanelIds = activePanelObjects.map((panel) => panel._id);
+
+        const panelsToPush = [...activePanelIds];
 
         if (panelIds.length !== uniquePanels.length) {
             const missingPanels = uniquePanels.filter((serialNumber) =>
@@ -76,7 +80,7 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
                 missingPanels.map((serialNumber) => ({ serialNumber, included: true }))
             );
 
-            panelIds.push(...newPanels.map((panel) => panel._id));
+            panelsToPush.push(...newPanels.map((panel) => panel._id));
         }
 
         const newBatch = new Batch({

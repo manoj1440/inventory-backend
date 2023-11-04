@@ -17,6 +17,10 @@ const panelSchema = new mongoose.Schema({
     DOM: Date,
     DOE: Date,
     PCM: String,
+    isActive: {
+        type: Boolean,
+        default: true
+    },
     included: {
         type: Boolean,
         default: false

@@ -103,7 +103,8 @@ const getPanelsForBatch = async (req, res, next) => {
     try {
         const panels = await Panel.find({ included: false });
         const panel2 = await Panel.find({ included: true, received: true });
-        return res.status(200).json({ status: true, data: [...panels, ...panel2], message: 'Panels fetched successfully' });
+        const panelsData = [...panels, ...panel2].filter(item => item.isActive);
+        return res.status(200).json({ status: true, data: panelsData, message: 'Panels fetched successfully' });
     } catch (error) {
         return res.status(500).json({ status: false, data: null, message: 'Error fetching panels' });
     }
