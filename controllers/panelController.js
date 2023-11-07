@@ -120,7 +120,6 @@ const getPanels = async (req, res, next) => {
     }
 };
 
-
 const getPanelsForBatch = async (req, res, next) => {
     try {
         const panels = await Panel.find({ included: false });
