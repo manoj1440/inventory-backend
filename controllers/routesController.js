@@ -139,10 +139,7 @@ const getRoutes = expressAsyncHandler(async (req, res) => {
             newObj['Crates'] = newCrates;
             newObj['Customers'] = newCustomers;
             return newObj;
-        })
-
-        console.log('newoutes===', newoutes);
-
+        });
 
         return res.status(200).json({ status: true, data: newoutes, message: 'Routes fetched successfully' });
     } catch (error) {
