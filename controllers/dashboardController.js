@@ -1,16 +1,28 @@
 const Batch = require('../models/Batch');
 const Panel = require('../models/Panel');
 const User = require('../models/User');
+const Route = require('../models/Route');
+const Crate = require('../models/Crate');
 
 const getDashboardData = async (req, res, next) => {
     try {
-        const totalBatches = await Batch.countDocuments();
-        const totalPanels = await Panel.countDocuments();
-        const totalPanelsInBatch = await Panel.countDocuments({ included: true });
-        const totalReceivedPanels = await Panel.countDocuments({ received: true });
-        const totalReceivedBatches = await Batch.countDocuments({ received: true });
+        const [batchCount, panelCount, totalPanelsInBatch, totalReceivedPanels, totalReceivedBatches] = await Promise.all([
+            Batch.countDocuments(),
+            Panel.countDocuments(),
+            Panel.countDocuments({ included: true }),
+            Panel.countDocuments({ received: true }),
+            Batch.countDocuments({ received: true }),
+        ]);
 
-        const userOverview = await User.aggregate([
+        const [totalRoutes, totalCrates, totalCratesInRoute, totalReceivedCrates, totalReceivedRoutes] = await Promise.all([
+            Route.countDocuments(),
+            Crate.countDocuments(),
+            Crate.countDocuments({ included: true }),
+            Crate.countDocuments({ received: true }),
+            Route.countDocuments({ received: true }),
+        ]);
+
+        const userOverviewPromise = User.aggregate([
             {
                 $match: {
                     role: 'customer'
@@ -34,15 +46,51 @@ const getDashboardData = async (req, res, next) => {
             },
         ]);
 
+        const customerOverviewPromise = User.aggregate([
+            {
+                $match: {
+                    role: 'customer'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'routes',
+                    localField: '_id',
+                    foreignField: 'Customers',
+                    as: 'userRoutes',
+                },
+            },
+            {
+                $project: {
+                    name: 1,
+                    role: 1,
+                    userRoutes: 1,
+                    numRoutesCreated: { $size: '$userRoutes' }
+                },
+            },
+        ]);
+
+        const [userOverview, customerOverview] = await Promise.all([userOverviewPromise, customerOverviewPromise]);
+
         return res.status(200).json({
             status: true,
             data: {
-                totalBatches,
-                totalPanels,
-                totalPanelsInBatch,
-                totalReceivedBatches,
-                totalReceivedPanels,
+                batches: {
+                    totalBatches: batchCount,
+                    totalPanels: panelCount,
+                    totalPanelsInBatch,
+                    totalReceivedBatches,
+                    totalReceivedPanels,
+                },
+                routes: {
+                    totalRoutes,
+                    totalCrates,
+                    totalCratesInRoute,
+                    totalReceivedRoutes,
+                    totalReceivedCrates,
+                },
                 userOverview,
+                customerOverview,
             },
             message: 'Dashboard data retrieved successfully',
         });

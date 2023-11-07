@@ -1,6 +1,6 @@
 const expressAsyncHandler = require('express-async-handler');
 const Routes = require('../models/Route');
-const Panel = require('../models/Panel');
+const Crate = require('../models/Crate');
 
 const addRoute = expressAsyncHandler(async (req, res) => {
     try {
@@ -26,7 +26,7 @@ const addRoute = expressAsyncHandler(async (req, res) => {
 
         const savedRoute = await newRoute.save();
         if (savedRoute) {
-            await Panel.updateMany(
+            await Crate.updateMany(
                 { _id: { $in: Crates } },
                 { $set: { included: true, received: null, receivedAt: null } }
             );
@@ -61,7 +61,7 @@ const scanToCreateRoute = expressAsyncHandler(async (req, res) => {
         }
         const uniqueCrates = Array.from(new Set(Crates));
 
-        const crateObjects = await Panel.find({ _id: { $in: uniqueCrates } });
+        const crateObjects = await Crate.find({ _id: { $in: uniqueCrates } });
         const activeCrateObjects = crateObjects.filter(item => item.isActive);
 
         const crateIds = crateObjects.map((crate) => crate._id);
@@ -75,7 +75,7 @@ const scanToCreateRoute = expressAsyncHandler(async (req, res) => {
             );
 
 
-            const newCrates = await Panel.insertMany(
+            const newCrates = await Crate.insertMany(
                 missingCrates.map((serialNumber) => ({ serialNumber, included: true }))
             );
 
@@ -93,7 +93,7 @@ const scanToCreateRoute = expressAsyncHandler(async (req, res) => {
 
         const savedRoute = await newRoute.save();
         if (savedRoute) {
-            await Panel.updateMany(
+            await Crate.updateMany(
                 { _id: { $in: CratesToPush } },
                 { $set: { received: null, receivedAt: null, included: true } }
             );
@@ -162,13 +162,13 @@ const updateRouteById = async (req, res) => {
         }
 
         if (updatedRoute && updates.Crates && updates.Crates.length > 0) {
-            await Panel.updateMany(
+            await Crate.updateMany(
                 { _id: { $in: updates.Crates } },
                 { $set: { included: true } }
             );
         }
         if (updatedRoute && updates.diffCrates && updates.diffCrates.length > 0) {
-            await Panel.updateMany(
+            await Crate.updateMany(
                 { _id: { $in: updates.diffCrates } },
                 { $set: { included: false } }
             );
@@ -223,7 +223,7 @@ const deleteRouteById = async (req, res) => {
             return res.status(404).json({ status: false, data: null, message: 'Route not found' });
         }
 
-        await Panel.updateMany(
+        await Crate.updateMany(
             { _id: { $in: route.Crates } },
             { $set: { included: false, received: null, receivedAt: null } }
         );

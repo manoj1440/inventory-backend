@@ -103,10 +103,11 @@ const getCrates = async (req, res, next) => {
         }
 
         const cratesWithAssetNumber = await Promise.all(crates.map(async (crate) => {
-            const route = await Route.findOne({ crates: { $in: [crate._id] } }).select('Name');
+            const route = await Route.findOne({ Crates: crate._id }).select('Name').populate('Customers');
             return {
                 ...crate.toObject(),
                 Name: route ? route.Name : null,
+                Customers: route && route.Customers ? route.Customers.map(customer => customer.name) : [],
             };
         }));
 
