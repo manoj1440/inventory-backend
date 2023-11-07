@@ -103,7 +103,7 @@ const getCrates = async (req, res, next) => {
         }
 
         const cratesWithAssetNumber = await Promise.all(crates.map(async (crate) => {
-            const route = await Route.findOne({ Crates: crate._id }).select('Name').populate('Customers');
+            const route = await Route.findOne({ 'DeliveringItems.crateIds': crate._id });
             return {
                 ...crate.toObject(),
                 Name: route ? route.Name : null,
@@ -210,10 +210,18 @@ const deleteCrateById = async (req, res, next) => {
             return res.status(404).json({ status: false, data: null, message: 'Crate not found' });
         }
 
-        await Route.updateMany(
-            { crates: crateId },
-            { $pull: { crates: crateId } }
-        );
+        const routesContainingCrate = await Route.find({
+            'DeliveringItems.crateIds': crateId
+        });
+
+        for (const route of routesContainingCrate) {
+            route.DeliveringItems = route.DeliveringItems.map((item) => {
+                item.crateIds = item.crateIds.filter((id) => id !== crateId);
+                return item;
+            });
+
+            await route.save();
+        }
 
         return res.status(200).json({ status: true, data: null, message: 'Crate deleted successfully' });
     } catch (error) {

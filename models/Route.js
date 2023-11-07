@@ -7,16 +7,16 @@ const routesSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    Customers: [
+    DeliveringItems: [
         {
-            type: Schema.Types.ObjectId,
-            ref: 'User'
-        },
-    ],
-    Crates: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: 'Crate'
+            crateIds: [{
+                type: Schema.Types.ObjectId,
+                ref: 'Crate'
+            }],
+            customerId: {
+                type: Schema.Types.ObjectId,
+                ref: 'User'
+            },
         },
     ],
     createdAt: {
