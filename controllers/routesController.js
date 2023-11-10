@@ -1,6 +1,7 @@
 const expressAsyncHandler = require('express-async-handler');
 const Routes = require('../models/Route');
 const Crate = require('../models/Crate');
+const OldRoute = require('../models/OldRoute');
 
 const addRoute = expressAsyncHandler(async (req, res) => {
     try {
@@ -39,6 +40,59 @@ const addRoute = expressAsyncHandler(async (req, res) => {
 
 
         return res.status(201).json({ status: true, data: savedRoute, message: 'Route created successfully' });
+    } catch (error) {
+        console.error('Error adding route:', error);
+        return res.status(500).json({ status: false, data: null, message: 'Error adding route', error: error });
+    }
+});
+
+const addNewDelivery = expressAsyncHandler(async (req, res) => {
+    try {
+        const { Name, DeliveringItems, receivedAt, received, Dispatched, oldData } = req.body;
+
+        if (!Name || !DeliveringItems || DeliveringItems.length === 0) {
+            return res.status(400).json({ status: false, data: null, message: 'Name and DeliveringItems are required' });
+        }
+
+        const updatedRoute = await Routes.findByIdAndUpdate(oldData._id, { DeliveringItems, Dispatched: null, dispatchedBy: null }, { new: true }).populate('DeliveringItems.crateIds DeliveringItems.customerId dispatchedBy');
+        if (!updatedRoute) {
+            return res.status(404).json({ status: false, data: null, message: 'Route not found' });
+        }
+
+        const existingOldRoute = await OldRoute.findOne({ Name });
+        if (!existingOldRoute) {
+            const newOldRoute = new OldRoute({
+                Name,
+                DeliverdItems: [oldData]
+            });
+
+            await newOldRoute.save();
+        } else {
+            existingOldRoute.DeliverdItems.push(oldData);
+            await existingOldRoute.save();
+        }
+
+        const createIds = DeliveringItems.reduce((acc, cur) => {
+            acc.push(...cur.crateIds);
+            return acc;
+        }, []);
+
+        const currentCrateIds = oldData.DeliveringItems.reduce((crateIds, item) => {
+            crateIds.push(...item.crateIds.map(crate => crate._id));
+            return crateIds;
+        }, []);
+
+        await Crate.updateMany(
+            { _id: { $in: currentCrateIds } },
+            { $set: { included: false, received: null, receivedAt: null } }
+        );
+
+        await Crate.updateMany(
+            { _id: { $in: createIds } },
+            { $set: { included: true, received: null, receivedAt: null } }
+        );
+
+        return res.status(201).json({ status: true, data: updatedRoute, message: 'Route created successfully' });
     } catch (error) {
         console.error('Error adding route:', error);
         return res.status(500).json({ status: false, data: null, message: 'Error adding route', error: error });
@@ -148,6 +202,16 @@ const getRoutes = expressAsyncHandler(async (req, res) => {
     }
 });
 
+const getOldRoutes = expressAsyncHandler(async (req, res) => {
+    try {
+        const routes = await OldRoute.find();
+
+        return res.status(200).json({ status: true, data: routes, message: 'Old Routes fetched successfully' });
+    } catch (error) {
+        console.log('error===', error);
+        return res.status(500).json({ status: false, error: error, data: null, message: 'Error fetching old routes' });
+    }
+});
 
 const getMyRoutes = expressAsyncHandler(async (req, res, next) => {
     try {
@@ -274,5 +338,7 @@ module.exports = {
     updateRouteById,
     deleteRouteById,
     updateRouteByName,
-    getMyRoutes
+    getMyRoutes,
+    addNewDelivery,
+    getOldRoutes
 };

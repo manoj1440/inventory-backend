@@ -4,7 +4,9 @@ const routesController = require('../controllers/routesController');
 const router = express.Router();
 
 router.post('/', routesController.addRoute); // Create a new batch
+router.post('/add-new-delivery', routesController.addNewDelivery); // Create a new batch
 router.get('/', routesController.getRoutes); // Get all batches
+router.get('/old', routesController.getOldRoutes); // Get all batches
 router.get('/self', routesController.getMyRoutes); // Get sel batches
 // router.post('/bulk', routesController.bulkUploadRoutes); //will do later
 router.post('/scan-to-create', routesController.scanToCreateRoute);
