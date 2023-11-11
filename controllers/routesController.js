@@ -49,7 +49,7 @@ const addRoute = expressAsyncHandler(async (req, res) => {
 
 const addNewDelivery = expressAsyncHandler(async (req, res) => {
     try {
-        const { Name, DeliveringItems, receivedAt, received, Dispatched, oldData } = req.body;
+        const { Name, DeliveringItems, fromApp, receivedAt, received, Dispatched, oldData } = req.body;
 
         if (!Name || !DeliveringItems || DeliveringItems.length === 0) {
             return res.status(400).json({ status: false, data: null, message: 'Name and DeliveringItems are required' });
@@ -73,10 +73,53 @@ const addNewDelivery = expressAsyncHandler(async (req, res) => {
             await existingOldRoute.save();
         }
 
-        const createIds = DeliveringItems.reduce((acc, cur) => {
-            acc.push(...cur.crateIds);
-            return acc;
-        }, []);
+        if (fromApp) {
+            const deliveringItemIds = [];
+
+            for (const item of DeliveringItems) {
+                const { customerId, crates } = item;
+
+                const crateIds = [];
+
+                for (const crateName of crates) {
+                    let crate = await Crate.findOne({ serialNumber: crateName });
+                    if (!crate) {
+                        crate = new Crate({
+                            serialNumber: crateName,
+                            included: true, received: null, receivedAt: null
+                        });
+
+                        await crate.save();
+                    }
+
+                    if (crate.isActive) {
+                        crateIds.push(crate._id);
+                    }
+                }
+
+                await Crate.updateMany(
+                    { _id: { $in: crateIds } },
+                    { $set: { included: true, received: null, receivedAt: null } }
+                );
+
+                deliveringItemIds.push({ customerId, crateIds });
+            }
+
+            if (deliveringItemIds && deliveringItemIds.length > 0) {
+                updates['DeliveringItems'] = deliveringItemIds
+            }
+
+        } else {
+            const createIds = DeliveringItems.reduce((acc, cur) => {
+                acc.push(...cur.crateIds);
+                return acc;
+            }, []);
+
+            await Crate.updateMany(
+                { _id: { $in: createIds } },
+                { $set: { included: true, received: null, receivedAt: null } }
+            );
+        }
 
         const currentCrateIds = oldData.DeliveringItems.reduce((crateIds, item) => {
             crateIds.push(...item.crateIds.map(crate => crate._id));
@@ -86,11 +129,6 @@ const addNewDelivery = expressAsyncHandler(async (req, res) => {
         await Crate.updateMany(
             { _id: { $in: currentCrateIds } },
             { $set: { included: false, received: null, receivedAt: null } }
-        );
-
-        await Crate.updateMany(
-            { _id: { $in: createIds } },
-            { $set: { included: true, received: null, receivedAt: null } }
         );
 
         return res.status(201).json({ status: true, data: updatedRoute, message: 'Route created successfully' });
@@ -283,6 +321,42 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
         updates['dispatchedBy'] = req.userData.user._id;
         delete updates['Name'];
         const NameArray = Array.isArray(Name) && Name.length > 0 ? Name : [Name];
+
+        const deliveringItemIds = [];
+
+        for (const item of DeliveringItems) {
+            const { customerId, crates } = item;
+
+            const crateIds = [];
+
+            for (const crateName of crates) {
+                let crate = await Crate.findOne({ serialNumber: crateName });
+                if (!crate) {
+                    crate = new Crate({
+                        serialNumber: crateName,
+                        included: true, received: null, receivedAt: null
+                    });
+
+                    await crate.save();
+                }
+
+                if (crate.isActive) {
+                    crateIds.push(crate._id);
+                }
+            }
+
+            await Crate.updateMany(
+                { _id: { $in: crateIds } },
+                { $set: { included: true, received: null, receivedAt: null } }
+            );
+
+            deliveringItemIds.push({ customerId, crateIds });
+        }
+
+        if (deliveringItemIds && deliveringItemIds.length > 0) {
+            updates['DeliveringItems'] = deliveringItemIds
+        }
+
         const updatedRoutes = await Routes.updateMany(
             { Name: { $in: NameArray } },
             updates,
