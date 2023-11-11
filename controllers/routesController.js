@@ -7,8 +7,8 @@ const addRoute = expressAsyncHandler(async (req, res) => {
     try {
         const { Name, DeliveringItems, receivedAt, received, Dispatched } = req.body;
 
-        if (!Name || !DeliveringItems || DeliveringItems.length === 0) {
-            return res.status(400).json({ status: false, data: null, message: 'Name and DeliveringItems are required' });
+        if (!Name) {
+            return res.status(400).json({ status: false, data: null, message: 'Route Name is required' });
         }
 
         const existingRoute = await Routes.findOne({ Name });
@@ -18,7 +18,7 @@ const addRoute = expressAsyncHandler(async (req, res) => {
 
         const newRoute = new Routes({
             Name,
-            DeliveringItems,
+            DeliveringItems: DeliveringItems && Array.isArray(DeliveringItems) && DeliveringItems.length > 0 ? DeliveringItems : [],
             receivedAt,
             received,
             Dispatched,
@@ -26,18 +26,19 @@ const addRoute = expressAsyncHandler(async (req, res) => {
 
         const savedRoute = await newRoute.save();
 
-        const createIds = DeliveringItems.reduce((acc, cur) => {
-            acc.push(...cur.crateIds);
-            return acc;
-        }, []);
+        if (DeliveringItems && Array.isArray(DeliveringItems) && DeliveringItems.length > 0) {
+            const createIds = DeliveringItems.reduce((acc, cur) => {
+                acc.push(...cur.crateIds);
+                return acc;
+            }, []);
 
-        if (savedRoute) {
-            await Crate.updateMany(
-                { _id: { $in: createIds } },
-                { $set: { included: true, received: null, receivedAt: null } }
-            );
+            if (savedRoute) {
+                await Crate.updateMany(
+                    { _id: { $in: createIds } },
+                    { $set: { included: true, received: null, receivedAt: null } }
+                );
+            }
         }
-
 
         return res.status(201).json({ status: true, data: savedRoute, message: 'Route created successfully' });
     } catch (error) {
