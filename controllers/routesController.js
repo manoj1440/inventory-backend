@@ -55,26 +55,10 @@ const addNewDelivery = expressAsyncHandler(async (req, res) => {
             return res.status(400).json({ status: false, data: null, message: 'Name and DeliveringItems are required' });
         }
 
-        const updatedRoute = await Routes.findByIdAndUpdate(oldData._id, { DeliveringItems, Dispatched: null, dispatchedBy: null }, { new: true }).populate('DeliveringItems.crateIds DeliveringItems.customerId dispatchedBy');
-        if (!updatedRoute) {
-            return res.status(404).json({ status: false, data: null, message: 'Route not found' });
-        }
-
-        const existingOldRoute = await OldRoute.findOne({ Name });
-        if (!existingOldRoute) {
-            const newOldRoute = new OldRoute({
-                Name,
-                DeliverdItems: [oldData]
-            });
-
-            await newOldRoute.save();
-        } else {
-            existingOldRoute.DeliverdItems.push(oldData);
-            await existingOldRoute.save();
-        }
+        let deliveringItemIds = [];
 
         if (fromApp) {
-            const deliveringItemIds = [];
+            deliveringItemIds = [];
 
             for (const item of DeliveringItems) {
                 const { customerId, crates } = item;
@@ -105,10 +89,6 @@ const addNewDelivery = expressAsyncHandler(async (req, res) => {
                 deliveringItemIds.push({ customerId, crateIds });
             }
 
-            if (deliveringItemIds && deliveringItemIds.length > 0) {
-                updates['DeliveringItems'] = deliveringItemIds
-            }
-
         } else {
             const createIds = DeliveringItems.reduce((acc, cur) => {
                 acc.push(...cur.crateIds);
@@ -119,6 +99,26 @@ const addNewDelivery = expressAsyncHandler(async (req, res) => {
                 { _id: { $in: createIds } },
                 { $set: { included: true, received: null, receivedAt: null } }
             );
+            deliveringItemIds = DeliveringItems;
+        }
+
+
+        const updatedRoute = await Routes.findByIdAndUpdate(oldData._id, { DeliveringItems: deliveringItemIds, Dispatched: null, dispatchedBy: null }, { new: true }).populate('DeliveringItems.crateIds DeliveringItems.customerId dispatchedBy');
+        if (!updatedRoute) {
+            return res.status(404).json({ status: false, data: null, message: 'Route not found' });
+        }
+
+        const existingOldRoute = await OldRoute.findOne({ Name });
+        if (!existingOldRoute) {
+            const newOldRoute = new OldRoute({
+                Name,
+                DeliverdItems: [oldData]
+            });
+
+            await newOldRoute.save();
+        } else {
+            existingOldRoute.DeliverdItems.push(oldData);
+            await existingOldRoute.save();
         }
 
         const currentCrateIds = oldData.DeliveringItems.reduce((crateIds, item) => {
