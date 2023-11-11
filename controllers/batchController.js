@@ -84,14 +84,14 @@ const scanToCreateBatch = expressAsyncHandler(async (req, res) => {
         }
 
         const newBatch = new Batch({
-            panels: panelIds,
+            panels: panelsToPush,
             AssetNumber,
         });
 
         const savedBatch = await newBatch.save();
         if (savedBatch) {
             await Panel.updateMany(
-                { _id: { $in: panelIds } },
+                { _id: { $in: panelsToPush } },
                 { $set: { received: null, receivedAt: null, included: true } }
             );
         }
