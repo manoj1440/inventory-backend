@@ -219,12 +219,12 @@ const getRoutes = expressAsyncHandler(async (req, res) => {
 
         const newoutes = routes.map(item => {
             const newObj = { ...item };
-            const newCrates = item.DeliveringItems.reduce((acc, cur) => {
+            const newCrates = item?.DeliveringItems?.reduce((acc, cur) => {
                 acc.push(...cur.crateIds);
                 return acc;
             }, []);
 
-            const newCustomers = item.DeliveringItems.reduce((acc, cur) => {
+            const newCustomers = item?.DeliveringItems?.reduce((acc, cur) => {
                 acc.push(cur.customerId);
                 return acc;
             }, []);
