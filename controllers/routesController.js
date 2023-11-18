@@ -182,6 +182,12 @@ const scanToCreateRoute = expressAsyncHandler(async (req, res) => {
                 }
             }
 
+            await Crate.updateMany(
+                { _id: { $in: crateIds } },
+                { $set: { included: true, received: null, receivedAt: null } }
+            );
+
+
             deliveringItemIds.push({ customerId, crateIds });
         }
 
