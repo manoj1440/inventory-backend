@@ -168,6 +168,11 @@ const scanToCreateRoute = expressAsyncHandler(async (req, res) => {
 
             for (const crateName of crates) {
                 let crate = await Crate.findOne({ serialNumber: crateName });
+
+                if (crate && !crate.included && crate.isActive) {
+                    crateIds.push(crate._id);
+                }
+
                 if (!crate) {
                     crate = new Crate({
                         serialNumber: crateName,
@@ -175,9 +180,6 @@ const scanToCreateRoute = expressAsyncHandler(async (req, res) => {
                     });
 
                     await crate.save();
-                }
-
-                if (crate.isActive) {
                     crateIds.push(crate._id);
                 }
             }
@@ -337,6 +339,11 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
             for (const crateName of crates) {
                 let crate = await Crate.findOne({ serialNumber: crateName });
+
+                if (crate && !crate.included && crate.isActive) {
+                    crateIds.push(crate._id);
+                }
+
                 if (!crate) {
                     crate = new Crate({
                         serialNumber: crateName,
@@ -344,9 +351,6 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
                     });
 
                     await crate.save();
-                }
-
-                if (crate.isActive) {
                     crateIds.push(crate._id);
                 }
             }
