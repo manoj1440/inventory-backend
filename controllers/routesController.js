@@ -334,9 +334,22 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
         const filteredNewItems = DeliveringItems.filter(item => item.isNew)
 
-        const filteredOldItems = DeliveringItems.filter(item => !item.isNew)
+        let filteredOldItems = DeliveringItems.filter(item => !item.isNew)
 
-        deliveringItemIds.push(...filteredOldItems);
+        for (const item of filteredOldItems) {
+            const { customerId, crates } = item;
+
+            const crateIds = [];
+
+            for (const crateName of crates) {
+                const crate = await Crate.findOne({ serialNumber: crateName });
+
+                crateIds.push(crate._id);
+            }
+
+            deliveringItemIds.push({ customerId, crateIds });
+        }
+
         for (const item of filteredNewItems) {
             const { customerId, crates } = item;
 
