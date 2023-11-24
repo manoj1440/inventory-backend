@@ -332,7 +332,12 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
         const deliveringItemIds = [];
 
-        for (const item of DeliveringItems) {
+        const filteredNewItems = DeliveringItems.filter(item => item.isNew)
+
+        const filteredOldItems = DeliveringItems.filter(item => !item.isNew)
+
+        deliveringItemIds.push(...filteredOldItems);
+        for (const item of filteredNewItems) {
             const { customerId, crates } = item;
 
             const crateIds = [];
