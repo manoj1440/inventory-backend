@@ -330,59 +330,62 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
         delete updates['Name'];
         const NameArray = Array.isArray(Name) && Name.length > 0 ? Name : [Name];
 
-        const deliveringItemIds = [];
 
-        const filteredNewItems = DeliveringItems.filter(item => item.isNew)
 
-        let filteredOldItems = DeliveringItems.filter(item => !item.isNew)
+        if (DeliveringItems && DeliveringItems.length > 0) {
+            const deliveringItemIds = [];
+            const filteredNewItems = DeliveringItems.filter(item => item.isNew)
 
-        for (const item of filteredOldItems) {
-            const { customerId, crates } = item;
+            let filteredOldItems = DeliveringItems.filter(item => !item.isNew)
 
-            const crateIds = [];
+            for (const item of filteredOldItems) {
+                const { customerId, crates } = item;
 
-            for (const crateName of crates) {
-                const crate = await Crate.findOne({ serialNumber: crateName });
+                const crateIds = [];
 
-                crateIds.push(crate._id);
-            }
+                for (const crateName of crates) {
+                    const crate = await Crate.findOne({ serialNumber: crateName });
 
-            deliveringItemIds.push({ customerId, crateIds });
-        }
-
-        for (const item of filteredNewItems) {
-            const { customerId, crates } = item;
-
-            const crateIds = [];
-
-            for (const crateName of crates) {
-                let crate = await Crate.findOne({ serialNumber: crateName });
-
-                if (crate && !crate.included && crate.isActive) {
                     crateIds.push(crate._id);
                 }
 
-                if (!crate) {
-                    crate = new Crate({
-                        serialNumber: crateName,
-                        included: true, received: null, receivedAt: null
-                    });
-
-                    await crate.save();
-                    crateIds.push(crate._id);
-                }
+                deliveringItemIds.push({ customerId, crateIds });
             }
 
-            await Crate.updateMany(
-                { _id: { $in: crateIds } },
-                { $set: { included: true, received: null, receivedAt: null } }
-            );
+            for (const item of filteredNewItems) {
+                const { customerId, crates } = item;
 
-            deliveringItemIds.push({ customerId, crateIds });
-        }
+                const crateIds = [];
 
-        if (deliveringItemIds && deliveringItemIds.length > 0) {
-            updates['DeliveringItems'] = deliveringItemIds
+                for (const crateName of crates) {
+                    let crate = await Crate.findOne({ serialNumber: crateName });
+
+                    if (crate && !crate.included && crate.isActive) {
+                        crateIds.push(crate._id);
+                    }
+
+                    if (!crate) {
+                        crate = new Crate({
+                            serialNumber: crateName,
+                            included: true, received: null, receivedAt: null
+                        });
+
+                        await crate.save();
+                        crateIds.push(crate._id);
+                    }
+                }
+
+                await Crate.updateMany(
+                    { _id: { $in: crateIds } },
+                    { $set: { included: true, received: null, receivedAt: null } }
+                );
+
+                deliveringItemIds.push({ customerId, crateIds });
+            }
+
+            if (deliveringItemIds && deliveringItemIds.length > 0) {
+                updates['DeliveringItems'] = deliveringItemIds
+            }
         }
 
         const updatedRoutes = await Routes.updateMany(
