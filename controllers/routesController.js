@@ -360,7 +360,7 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
                 for (const crateName of crates) {
                     let crate = await Crate.findOne({ serialNumber: crateName });
 
-                    if (crate && !crate.included && crate.isActive) {
+                    if (crate && (!crate.included || crate.received) && crate.isActive) {
                         crateIds.push(crate._id);
                     }
 
