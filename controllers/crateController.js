@@ -157,7 +157,7 @@ const getCrateByName = async (req, res, next) => {
             return res.status(404).json({ status: false, data: null, message: 'Crate not found' });
         }
 
-        return res.status(200).json({ status: true, data: crate, message: 'Crate fetched successfully' });
+        return res.status(200).json({ status: true, data: crate, isReceived: crate.received, message: 'Crate fetched successfully' });
     } catch (error) {
         return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching crate' });
     }
