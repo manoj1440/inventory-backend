@@ -151,14 +151,7 @@ const getCrateById = async (req, res, next) => {
 const getCrateByName = async (req, res, next) => {
     try {
         const { crateName } = req.body;
-
-        console.log('crateName====',crateName)
-
         const parsedCrateName = crateName.replace(/\//g, '/');
-
-        console.log('parsedCrateName====',parsedCrateName)
-
-
         const crate = await Crate.findOne({ serialNumber: parsedCrateName }).lean();
 
         if (!crate) {
@@ -167,7 +160,6 @@ const getCrateByName = async (req, res, next) => {
 
         return res.status(200).json({ status: true, data: crate, canScan: !crate.included || !!(crate.included && crate.received), message: 'Crate fetched successfully' });
     } catch (error) {
-        console.log('error====',error)
         return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching crate' });
     }
 };
