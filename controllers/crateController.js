@@ -150,7 +150,7 @@ const getCrateById = async (req, res, next) => {
 
 const getCrateByName = async (req, res, next) => {
     try {
-        const crateName = req.params.crateName;
+        const { crateName } = req.body;
         const crate = await Crate.findOne({ serialNumber: crateName });
 
         if (!crate) {
