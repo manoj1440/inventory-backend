@@ -151,9 +151,7 @@ const getCrateById = async (req, res, next) => {
 const getCrateByName = async (req, res, next) => {
     try {
         const { crateName } = req.body;
-
         const parsedCrateName = crateName.replace(/\//g, '/');
-
         const crate = await Crate.findOne({ serialNumber: parsedCrateName }).lean();
 
         if (!crate) {
