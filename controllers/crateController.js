@@ -151,13 +151,14 @@ const getCrateById = async (req, res, next) => {
 const getCrateByName = async (req, res, next) => {
     try {
         const { crateName } = req.body;
-        const crate = await Crate.findOne({ serialNumber: crateName });
+
+        const crate = await Crate.findOne({ serialNumber: crateName }).lean();
 
         if (!crate) {
-            return res.status(404).json({ status: false, data: null, message: 'Crate not found' });
+            return res.status(200).json({ status: true, data: null, isReceived: false });
         }
 
-        return res.status(200).json({ status: true, data: crate, isReceived: crate.received, message: 'Crate fetched successfully' });
+        return res.status(200).json({ status: true, data: crate, isReceived: !!crate.received, message: 'Crate fetched successfully' });
     } catch (error) {
         return res.status(200).json({ status: false, error: error, data: null, message: 'Error fetching crate' });
     }
