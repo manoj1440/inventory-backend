@@ -152,7 +152,9 @@ const getCrateByName = async (req, res, next) => {
     try {
         const { crateName } = req.body;
 
-        const crate = await Crate.findOne({ serialNumber: crateName }).lean();
+        const parsedCrateName = crateName.replace(/\//g, '/');
+
+        const crate = await Crate.findOne({ serialNumber: parsedCrateName }).lean();
 
         if (!crate) {
             return res.status(200).json({ status: true, data: null, canScan: true });
