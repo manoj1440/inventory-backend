@@ -361,7 +361,10 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
                     let crate = await Crate.findOne({ serialNumber: crateName });
 
                     if (crate && (!crate.included || crate.received) && crate.isActive) {
-                        crateIds.push(crate._id);
+
+                        if (!crateIds.includes(crate._id)) {
+                            crateIds.push(crate._id);
+                        }
                     }
 
                     if (!crate) {
@@ -371,7 +374,9 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
                         });
 
                         await crate.save();
-                        crateIds.push(crate._id);
+                        if (!crateIds.includes(crate._id)) {
+                            crateIds.push(crate._id);
+                        }
                     }
                 }
 
