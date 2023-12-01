@@ -340,8 +340,16 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
             const deliveringItemIds = routeData ? [...routeData.DeliveringItems] : [];
 
-            const processCratesPromises = DeliveringItems.map(item => processCrates(item.crates));
+            const processCratesPromises = DeliveringItems.map(async item => {
+                return {
+                    customerId: item.customerId,
+                    crateIds: await processCrates(item.crates)
+                }
+            });
+
             const processedCratesResults = await Promise.all(processCratesPromises);
+
+            console.log('processedCratesResults==', processedCratesResults);
 
             processedCratesResults.forEach(({ customerId, crateIds }) => {
                 const existingItem = deliveringItemIds.find(item => item.customerId === customerId);
@@ -374,17 +382,19 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
 async function processCrates(crates) {
     const cratePromises = crates.map(async crateName => {
-        const crate = await Crate.findOneAndUpdate(
+        const crate = Crate.findOneAndUpdate(
             { serialNumber: crateName },
-            { $setOnInsert: { included: true, received: null, receivedAt: null } },
+            { $set: { included: true, received: null, receivedAt: null } },
             { upsert: true, new: true }
         );
 
-        return crate._id;
+        return crate
     });
 
     const crateIds = await Promise.all(cratePromises);
-    return crateIds;
+
+    console.log('crateIds===', crateIds);
+    return crateIds.map(item => item._id.toString());
 }
 
 
