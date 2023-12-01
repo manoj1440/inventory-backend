@@ -343,9 +343,12 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
             for (const item of DeliveringItems) {
                 const { customerId, crates } = item;
-                const crateIds = await processCrates(crates);
+                const existingItem = deliveringItemIds.find((existingItem) => existingItem.customerId === customerId);
 
-                deliveringItemIds.push({ customerId, crateIds });
+                if (!existingItem) {
+                    const crateIds = await processCrates(crates);
+                    deliveringItemIds.push({ customerId, crateIds });
+                }
             }
 
 
