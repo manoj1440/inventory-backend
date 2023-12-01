@@ -330,10 +330,13 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
         delete updates['Name'];
         const NameArray = Array.isArray(Name) && Name.length > 0 ? Name : [Name];
 
-        if (DeliveringItems && DeliveringItems.length > 0) {
-            const deliveringItemIds = [];
-            const filteredNewItems = DeliveringItems.filter(item => item.isNew)
+        let runOnce = 1;
 
+        if (DeliveringItems && DeliveringItems.length > 0 && runOnce <= 1) {
+
+            runOnce = runOnce + 1;
+            const deliveringItemIds = [];
+            const filteredNewItems = DeliveringItems.filter(item => item.isNew);
             console.log('filteredNewItems===', filteredNewItems);
 
 
