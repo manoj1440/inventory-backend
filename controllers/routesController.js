@@ -2,6 +2,7 @@ const expressAsyncHandler = require('express-async-handler');
 const Routes = require('../models/Route');
 const Crate = require('../models/Crate');
 const OldRoute = require('../models/OldRoute');
+const Route = require('../models/Route');
 
 const addRoute = expressAsyncHandler(async (req, res) => {
     try {
@@ -336,9 +337,17 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
         if (DeliveringItems && DeliveringItems.length > 0 && runOnce <= 1) {
             runOnce += 1;
 
-            const deliveringItemIds = await processDeliveringItems(DeliveringItems);
+            const routeData = await Route.findOne({ Name }).lean()
 
-            delete updates['DeliveringItems'];
+            const deliveringItemIds = routeData ? [...routeData.DeliveringItems] : [];
+
+            for (const item of DeliveringItems) {
+                const { customerId, crates } = item;
+                const crateIds = await processCrates(crates);
+
+                deliveringItemIds.push({ customerId, crateIds });
+            }
+
 
             if (deliveringItemIds && deliveringItemIds.length > 0) {
                 updates['DeliveringItems'] = deliveringItemIds;
@@ -360,19 +369,6 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
         return res.status(200).json({ status: false, error: error, data: null, message: 'Error updating Routes' + error });
     }
 });
-
-async function processDeliveringItems(deliveringItems) {
-    const deliveringItemIds = [];
-
-    for (const item of deliveringItems) {
-        const { customerId, crates } = item;
-        const crateIds = await processCrates(crates);
-
-        deliveringItemIds.push({ customerId, crateIds });
-    }
-
-    return deliveringItemIds;
-}
 
 async function processCrates(crates) {
     const crateIds = [];
