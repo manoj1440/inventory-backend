@@ -424,6 +424,31 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
     }
 });
 
+const dispatchRouteByName = expressAsyncHandler(async (req, res, next) => {
+    try {
+        const { Name } = req.body;
+
+        if (!Name) {
+            return res.status(404).json({ status: false, data: null, message: 'Name cannot be blank' });
+        }
+
+        const bodyUpdate = {
+            dispatchedBy: req.userData.user._id,
+            Dispatched: new Date().toISOString()
+        }
+
+        const updatedRoutes = await Routes.findOneAndUpdate(
+            { Name },
+            bodyUpdate,
+            { new: true }
+        ).populate('DeliveringItems.crateIds DeliveringItems.customerId dispatchedBy');
+
+        return res.status(200).json({ status: true, data: updatedRoutes, message: 'Routes updated successfully' });
+    } catch (error) {
+        return res.status(200).json({ status: false, error: error, data: null, message: 'Error updating Routes' + error });
+    }
+});
+
 const deleteRouteById = expressAsyncHandler(async (req, res) => {
     try {
         const routeId = req.params.id;
@@ -466,5 +491,6 @@ module.exports = {
     updateRouteByName,
     getMyRoutes,
     addNewDelivery,
-    getOldRoutes
+    getOldRoutes,
+    dispatchRouteByName
 };

@@ -10,6 +10,7 @@ router.get('/old', routesController.getOldRoutes); // Get all batches
 router.get('/self', routesController.getMyRoutes); // Get sel batches
 // router.post('/bulk', routesController.bulkUploadRoutes); //will do later
 router.post('/scan-to-create', routesController.scanToCreateRoute);
+router.post('/dispatch/route', routesController.dispatchRouteByName);
 router.get('/:id', routesController.getRouteById); // Get a batch by ID
 router.put('/:id', routesController.updateRouteById); // Update a batch by ID
 router.put('/', routesController.updateRouteByName); // Update a batch by ID
