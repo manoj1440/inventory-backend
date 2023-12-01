@@ -330,11 +330,12 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
         delete updates['Name'];
         const NameArray = Array.isArray(Name) && Name.length > 0 ? Name : [Name];
 
-
-
         if (DeliveringItems && DeliveringItems.length > 0) {
             const deliveringItemIds = [];
             const filteredNewItems = DeliveringItems.filter(item => item.isNew)
+
+            console.log('filteredNewItems===', filteredNewItems);
+
 
             let filteredOldItems = DeliveringItems.filter(item => !item.isNew)
 
@@ -343,10 +344,12 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
 
                 const crateIds = [];
 
-                for (const crateName of crates) {
-                    const crate = await Crate.findOne({ serialNumber: crateName });
+                if (crates && Array.isArray(crates)) {
+                    for (const crateName of crates) {
+                        const crate = await Crate.findOne({ serialNumber: crateName });
 
-                    crateIds.push(crate._id);
+                        crateIds.push(crate._id);
+                    }
                 }
 
                 deliveringItemIds.push({ customerId, crateIds });
@@ -378,15 +381,24 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
                             crateIds.push(crate._id);
                         }
                     }
+
                 }
 
-                await Crate.updateMany(
-                    { _id: { $in: crateIds } },
-                    { $set: { included: true, received: null, receivedAt: null } }
-                );
 
-                deliveringItemIds.push({ customerId, crateIds });
+                console.log('crateIds===', crateIds);
+
+                if (crateIds.length > 0) {
+                    await Crate.updateMany(
+                        { _id: { $in: crateIds } },
+                        { $set: { included: true, received: null, receivedAt: null } }
+                    );
+                    deliveringItemIds.push({ customerId, crateIds });
+                }
             }
+
+            console.log('deliveringItemIds===', deliveringItemIds);
+
+            delete updates['DeliveringItems'];
 
             if (deliveringItemIds && deliveringItemIds.length > 0) {
                 updates['DeliveringItems'] = deliveringItemIds
