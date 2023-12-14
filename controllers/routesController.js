@@ -350,10 +350,11 @@ const updateRouteByName = expressAsyncHandler(async (req, res, next) => {
             const processedCratesResults = await Promise.all(processCratesPromises);
 
             console.log('processedCratesResults==', processedCratesResults);
+            console.log('deliveringItemIds==', deliveringItemIds);
 
             processedCratesResults.forEach(({ customerId, crateIds }) => {
-                const existingItem = deliveringItemIds.find(item => item.customerId === customerId);
-
+                const existingItem = deliveringItemIds.find(item => item.customerId.toString() === customerId);
+                console.log('existingItem==', existingItem);
                 if (!existingItem) {
                     deliveringItemIds.push({ customerId, crateIds });
                 }
